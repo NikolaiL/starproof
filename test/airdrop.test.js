@@ -13,6 +13,14 @@ import {createApp} from '../server.js';
 import {testIdentity} from './fixtures/pki.js';
 
 const forkUrl=process.env.BASE_FORK_URL;
+test('issuer configuration accepts surrounding secret-input whitespace without exposing the key',async()=>{
+  const issuerKey='0x'+BigInt(0xA11CE).toString(16).padStart(64,'0');
+  const drop=createAirdrop({issuerKey:' \n'+issuerKey+'\n'});
+  const result=await drop.config();
+  assert.equal(result.issuer,privateKeyToAccount(issuerKey).address);
+  assert.equal(result.enabled,false);
+  assert.ok(!JSON.stringify(result).includes(issuerKey));
+});
 test('an unconfigured drop stays disabled without leaking invalid secret configuration',async()=>{
   const drop=createAirdrop({rpcUrl:'not a URL',contract:'SECRET-CONFIGURATION',issuerKey:'SECRET-KEY'});
   const result=await drop.config();
