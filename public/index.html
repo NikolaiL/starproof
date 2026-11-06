@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b1118">
+  <title>Starproof — a mission you sign</title>
+  <link rel="stylesheet" href="/style.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <header>
+    <a class="brand" href="/" aria-label="Starproof home"><span class="brandmark">✳</span> STARPROOF<span class="edition">FLIGHT TEST / 001</span></a>
+    <div class="header-right"><span id="trust-status" class="status">AWAITING LAUNCH</span><button id="connect" class="button compact">Connect Wedgie <span>↗</span></button></div>
+  </header>
+  <main>
+    <section class="intro">
+      <div><p class="eyebrow">DEEP SPACE. REAL HARDWARE.</p><h1>A mission<br>you <em>sign.</em></h1></div>
+      <div class="intro-copy"><p>Explore without interruption.<br> Put your signature on the decisions that matter.</p><p class="signature-rule"><span class="dot"></span> LAUNCH · JUMP · CLAIM</p></div>
+      <div class="coordinates">DEEP FIELD<br>RA 19h 28m<br>DEC +42° 36′</div>
+    </section>
+
+    <div class="workspace">
+      <aside class="console" aria-label="Mission controls">
+        <div class="panel-title"><span>01 / FLIGHT CONSOLE</span><span class="live-dot"></span></div>
+        <div class="ship-emblem" aria-hidden="true"><svg viewBox="0 0 180 110"><g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M90 12 108 63 146 85 112 85 101 75 90 94 79 75 68 85 34 85 72 63Z"/><path d="m90 12 0 82M72 63l18 9 18-9M82 51h16M79 75l11-19 11 19"/><circle cx="90" cy="61" r="47" stroke-dasharray="2 7" opacity=".35"/></g></svg></div>
+        <p class="eyebrow ship-label">EXPLORATION VESSEL</p><h2>Wayfarer <span>01</span></h2>
+        <div class="ship-stats"><div><span>JUMP FUEL</span><strong id="fuel">08 <small>/ 08</small></strong></div><div><span>ARTIFACTS</span><strong id="artifact-count">00 <small>/ 04</small></strong></div></div>
+        <div class="device-card"><span class="eyebrow">SIGNING DEVICE</span><p id="device-status">No Wedgie connected</p><span id="device-detail">Your factory key stays on the chip.</span></div>
+        <button id="launch" class="button primary full">Authorize expedition <span>↗</span></button>
+        <p id="mission-hint" class="small-note">A real Trust M signature is required to leave Sol.</p>
+        <div class="controls-note"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><span>or arrows to fly</span><br><kbd>SPACE</kbd><span>scan nearby signals</span><p>Flying, scanning and inspecting the map never ask for a signature.</p></div>
+      </aside>
+
+      <section class="chart" aria-label="Star map">
+        <div class="chart-toolbar"><div><span class="eyebrow">NAVIGATION CHART</span><h2 id="chart-title">The near unknown</h2></div><span id="location-tag" class="tag">SOL SYSTEM</span></div>
+        <div class="canvas-wrap"><canvas id="space" tabindex="0" aria-label="Interactive star map. Use the destination buttons below to select a star system, then authorize a jump."></canvas><div id="map-overlay"><span class="crosshair">＋</span><p>Your expedition begins<br>with a signature.</p></div><div class="chart-scale">1 px ≈ 0.03 light years <span>·</span> LOCAL CHART</div></div>
+        <nav id="destinations" aria-label="Select a destination"></nav>
+      </section>
+
+      <aside class="destination" aria-label="Selected destination">
+        <div class="panel-title"><span>02 / DESTINATION</span><span>↗</span></div>
+        <div id="planet" class="planet" aria-hidden="true"></div>
+        <p id="world-type" class="eyebrow">HOME SYSTEM</p><h2 id="destination-name">Sol</h2><p id="destination-description" class="description">Home signal. The last familiar light.</p>
+        <dl class="destination-facts"><div><dt>LANDMARK</dt><dd id="landmark">Luna</dd></div><div><dt>STATUS</dt><dd id="destination-state">Unexplored</dd></div><div><dt>JUMP COST</dt><dd id="jump-cost">—</dd></div></dl>
+        <button id="jump" class="button full">Commit jump <span>↗</span></button>
+        <button id="claim" class="button full subtle">Claim artifact <span>＋</span></button>
+        <p class="small-note">These decisions ask for the green button on your Wedgie.</p>
+      </aside>
+    </div>
+
+    <section class="flight-log"><div class="log-heading"><div><p class="eyebrow">03 / EXPEDITION RECORD</p><h2>Every commitment leaves a trace.</h2></div><button id="export" class="text-button" disabled>Export signed receipts ↗</button></div><ol id="receipts"><li class="empty-log"><span>—</span>No signed actions yet. Connect a Wedgie to begin.</li></ol></section>
+    <section class="verification-note"><span class="seal">◎</span><p><strong>Proof of a chip, not proof of a person.</strong> The server checks the Infineon certificate chain, the exact action and a fresh challenge. It cannot attest the device firmware or prove a human pressed the button.</p><a href="https://wedgie.dev/trustm.md" target="_blank" rel="noreferrer">Meet the hardware ↗</a></section>
+  </main>
+  <footer><span>STARPROOF / EXPERIMENTAL FLIGHT SOFTWARE</span><span>NO TOKENS. NO TRANSACTION FEES. JUST SPACE.</span></footer>
+  <div id="notice" role="status" aria-live="polite" hidden></div>
+  <dialog id="approval" aria-labelledby="approval-title"><div class="approval-icon">✳</div><p class="eyebrow">PHYSICAL CONFIRMATION</p><h2 id="approval-title">Check your Wedgie.</h2><p id="approval-description"></p><div class="button-legend"><span><i class="green"></i> green to sign</span><span><i class="red"></i> red to decline</span></div><p class="small-note">The request expires automatically. Nothing happens without a valid signature.</p><button id="cancel" class="button full subtle">Cancel request</button></dialog>
+</body>
+</html>
