@@ -2,6 +2,12 @@
 
 A browser space-exploration reference game for [wedgie-actions](https://github.com/NikolaiL/wedgie-actions), using a Wedgie with an **OPTIGA Trust M** chip. A manufacturer-certified factory key signs the launch of an expedition and its strategic decisions. Flying, scanning and inspecting destinations need no signature.
 
+## Screenshots
+
+![Starproof browser game with the central Start exploring button, planet map and ship resources](docs/images/starproof-game.png)
+
+The browser game starts here; recovered star maps expand the same playing field to 20 planets.
+
 ## Run
 
 Requires Node.js 24+ and desktop Chrome or Edge for Web Serial. The signing toolkit and installable device app are pinned to GitHub commits. The browser build bundles Three.js and Wedgie’s real 3D model; esbuild is a development dependency. No GitHub login or SSH key is needed to install dependencies.
