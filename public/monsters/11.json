@@ -1,0 +1,16 @@
+{
+  "name": "The Cloud Noodle",
+  "description": "A Starproof encounter from Aurora. Minted after a server-verified certified-chip artifact claim. The issuer is trusted; this is not firmware attestation.",
+  "image": "https://starproof-wedgie.vercel.app/monsters/11.svg",
+  "external_url": "https://starproof-wedgie.vercel.app/",
+  "attributes": [
+    {
+      "trait_type": "World",
+      "value": "Aurora"
+    },
+    {
+      "trait_type": "Species",
+      "value": "jelly"
+    }
+  ]
+}

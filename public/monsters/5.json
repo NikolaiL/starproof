@@ -1,0 +1,16 @@
+{
+  "name": "The Toast Goblin",
+  "description": "A Starproof encounter from Cinder. Minted after a server-verified certified-chip artifact claim. The issuer is trusted; this is not firmware attestation.",
+  "image": "https://starproof-wedgie.vercel.app/monsters/5.svg",
+  "external_url": "https://starproof-wedgie.vercel.app/",
+  "attributes": [
+    {
+      "trait_type": "World",
+      "value": "Cinder"
+    },
+    {
+      "trait_type": "Species",
+      "value": "chomper"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "name": "The Void Friend",
+  "description": "A Starproof encounter from Rift. Minted after a server-verified certified-chip artifact claim. The issuer is trusted; this is not firmware attestation.",
+  "image": "https://starproof-wedgie.vercel.app/monsters/20.svg",
+  "external_url": "https://starproof-wedgie.vercel.app/",
+  "attributes": [
+    {
+      "trait_type": "World",
+      "value": "Rift"
+    },
+    {
+      "trait_type": "Species",
+      "value": "cyclops"
+    }
+  ]
+}

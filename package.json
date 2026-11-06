@@ -13,7 +13,7 @@
     "pretest": "npm run build",
     "build": "node tools/build.js",
     "prestart": "npm run build",
-    "contracts:build": "forge build && node tools/sync-airdrop.js",
+    "contracts:build": "forge build && node tools/sync-airdrop.js && node tools/sync-monsters.js",
     "test:contracts": "forge test",
     "test:fork": "node --test --test-concurrency=1 test/airdrop.test.js test/token-fork.test.js"
   },

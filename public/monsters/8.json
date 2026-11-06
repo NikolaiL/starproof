@@ -1,0 +1,16 @@
+{
+  "name": "The Solar Peeper",
+  "description": "A Starproof encounter from Nova. Minted after a server-verified certified-chip artifact claim. The issuer is trusted; this is not firmware attestation.",
+  "image": "https://starproof-wedgie.vercel.app/monsters/8.svg",
+  "external_url": "https://starproof-wedgie.vercel.app/",
+  "attributes": [
+    {
+      "trait_type": "World",
+      "value": "Nova"
+    },
+    {
+      "trait_type": "Species",
+      "value": "cyclops"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "name": "The Frost Admiral",
+  "description": "A Starproof encounter from Polaris. Minted after a server-verified certified-chip artifact claim. The issuer is trusted; this is not firmware attestation.",
+  "image": "https://starproof-wedgie.vercel.app/monsters/12.svg",
+  "external_url": "https://starproof-wedgie.vercel.app/",
+  "attributes": [
+    {
+      "trait_type": "World",
+      "value": "Polaris"
+    },
+    {
+      "trait_type": "Species",
+      "value": "crab"
+    }
+  ]
+}

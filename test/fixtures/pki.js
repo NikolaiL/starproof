@@ -31,5 +31,5 @@ export function testIdentity() {
     const binding=words(signature(factory,Buffer.concat([Buffer.from('wedgie safe key\0'),Buffer.from(wallet.x.slice(2)+wallet.y.slice(2),'hex')])));
     return {text,code,...wallet,...walletSignature,cert:certificate,fr:binding.r,fs:binding.s};
   };
-  return {certificate,verifier,wallet,prove};
+  return {certificate,verifier,wallet,prove,signAction: text => { const sig = signature(factory, Buffer.from(text)); return {r:sig.subarray(0,32).toString('hex'),s:sig.subarray(32).toString('hex')}; }};
 }

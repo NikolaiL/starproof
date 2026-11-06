@@ -1,0 +1,16 @@
+{
+  "name": "The Neon Flutter",
+  "description": "A Starproof encounter from Borealis. Minted after a server-verified certified-chip artifact claim. The issuer is trusted; this is not firmware attestation.",
+  "image": "https://starproof-wedgie.vercel.app/monsters/9.svg",
+  "external_url": "https://starproof-wedgie.vercel.app/",
+  "attributes": [
+    {
+      "trait_type": "World",
+      "value": "Borealis"
+    },
+    {
+      "trait_type": "Species",
+      "value": "moth"
+    }
+  ]
+}

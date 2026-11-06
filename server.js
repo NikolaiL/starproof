@@ -4,6 +4,8 @@ import { fileURLToPath } from 'node:url';
 import { MemorySessions, RedisSessions } from './lib/sessions.js';
 import { trustM } from 'wedgie-actions/server';
 import { createAirdrop } from './lib/airdrop.js';
+import { createMonsters } from './lib/monsters.js';
+import { MONSTERS } from './public/monster-catalog.js';
 
 const PUBLIC = new URL('./public/', import.meta.url);
 const FILES = { '/': ['index.html', 'text/html'], '/style.css': ['style.css', 'text/css'],
@@ -20,12 +22,22 @@ const FILES = { '/': ['index.html', 'text/html'], '/style.css': ['style.css', 't
   '/3d/wedgie.json': ['3d/wedgie.json', 'application/json'], '/3d/wedgie.bin': ['3d/wedgie.bin', 'application/octet-stream'],
   '/airdrop-setup.html': ['airdrop-setup.html', 'text/html'], '/airdrop-setup.js': ['airdrop-setup.js', 'text/javascript'], '/airdrop-deploy.json': ['airdrop-deploy.json', 'application/json'], '/vendor/airdrop-wallet.js': ['vendor/airdrop-wallet.js', 'text/javascript'],
   '/airdrop.js': ['airdrop.js', 'text/javascript'], '/token.js': ['token.js', 'text/javascript'], '/sdk.js': [new URL(import.meta.resolve('wedgie-actions/browser')), 'text/javascript'], '/protocol.js': ['protocol.js', 'text/javascript'] };
-const ROUTES = new Set(['GET /api/state', 'POST /api/device', 'POST /api/challenge', 'POST /api/commit', 'POST /api/cancel', 'POST /api/settings', 'POST /api/act', 'GET /api/airdrop', ...['wallets','status','challenge','proof','submit','cancel'].map(path => 'POST /api/airdrop/' + path)]);
+for (const monster of MONSTERS) {
+  FILES['/monsters/' + monster.worldId + '.json'] = ['monsters/' + monster.worldId + '.json', 'application/json'];
+  FILES['/monsters/' + monster.worldId + '.svg'] = ['monsters/' + monster.worldId + '.svg', 'image/svg+xml'];
+}
+FILES['/monster-setup.html'] = ['monster-setup.html', 'text/html'];
+FILES['/monster-setup.js'] = ['monster-setup.js', 'text/javascript'];
+FILES['/collectibles.js'] = ['collectibles.js', 'text/javascript'];
+FILES['/monster-catalog.js'] = ['monster-catalog.js', 'text/javascript'];
+FILES['/vendor/collectibles.js'] = ['vendor/collectibles.js', 'text/javascript'];
+const ROUTES = new Set(['GET /api/monsters', 'POST /api/monsters/voucher', 'GET /api/state', 'POST /api/device', 'POST /api/challenge', 'POST /api/commit', 'POST /api/cancel', 'POST /api/settings', 'POST /api/act', 'GET /api/airdrop', ...['wallets','status','challenge','proof','submit','cancel'].map(path => 'POST /api/airdrop/' + path)]);
 
 // Tests pass an ephemeral test PKI; the running server always uses the production verifier.
-export function createHandler(verifier = trustM, { store, airdrop: providedAirdrop, origin: configuredOrigin = process.env.APP_ORIGIN } = {}) {
+export function createHandler(verifier = trustM, { store, airdrop: providedAirdrop, monsters: providedMonsters, origin: configuredOrigin = process.env.APP_ORIGIN } = {}) {
   if (process.env.VERCEL && !store && !(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN)) throw new Error('Shared mission storage is required on Vercel.');
   const sessions = store || (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN ? new RedisSessions(process.env.KV_REST_API_URL, process.env.KV_REST_API_TOKEN) : new MemorySessions());
+  const monsters = providedMonsters || createMonsters({ verifier });
   const airdrop = providedAirdrop || createAirdrop({store:sessions,verifier});
   return async (req, res) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -64,6 +76,7 @@ export function createHandler(verifier = trustM, { store, airdrop: providedAirdr
         }
         if (!body || Array.isArray(body) || typeof body !== 'object') return json({ error: 'Expected an object.' }, 400);
       }
+      if (path === '/api/monsters') return json(await monsters.config());
       if (path === '/api/airdrop') {
         res.setHeader('Cache-Control', 'public, max-age=5, s-maxage=5');
         return json(await airdrop.config());
@@ -77,6 +90,7 @@ export function createHandler(verifier = trustM, { store, airdrop: providedAirdr
         if (session.requests.length >= 30) return reply({ error: 'Too many requests. Wait a minute.' }, 429);
         session.requests.push(now);
         try {
+          if (path === '/api/monsters/voucher') return reply(await monsters.voucher(session.game, body, origin));
           if (path.startsWith('/api/airdrop/')) return reply(await airdrop.handle(path,session,body,origin));
           if (path === '/api/settings') return reply(session.game.setConfirmations(body));
           if (path === '/api/act') return reply(session.game.act(body.action, body.target));

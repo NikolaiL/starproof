@@ -1,0 +1,16 @@
+{
+  "name": "The Snowball",
+  "description": "A Starproof encounter from Glacier. Minted after a server-verified certified-chip artifact claim. The issuer is trusted; this is not firmware attestation.",
+  "image": "https://starproof-wedgie.vercel.app/monsters/10.svg",
+  "external_url": "https://starproof-wedgie.vercel.app/",
+  "attributes": [
+    {
+      "trait_type": "World",
+      "value": "Glacier"
+    },
+    {
+      "trait_type": "Species",
+      "value": "cyclops"
+    }
+  ]
+}

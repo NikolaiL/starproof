@@ -1,0 +1,8 @@
+import { readFile, writeFile } from 'node:fs/promises';
+const compiled = JSON.parse(await readFile(new URL('../out/StarproofMonsters.sol/StarproofMonsters.json', import.meta.url)));
+const output = JSON.stringify({ abi: compiled.abi, bytecode: compiled.bytecode.object,
+  deployedBytecode: compiled.deployedBytecode.object, immutableReferences: compiled.deployedBytecode.immutableReferences });
+const target = new URL('../lib/monsters-artifact.json', import.meta.url);
+if (process.argv.includes('--check')) {
+  if (await readFile(target, 'utf8') !== output) throw new Error('Rebuild the committed monster artifact.');
+} else await writeFile(target, output);

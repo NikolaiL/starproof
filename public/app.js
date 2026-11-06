@@ -1,3 +1,4 @@
+import { mountCollectibles } from './collectibles.js';
 import { mountAirdrop } from './airdrop.js';
 import { WedgieSigner } from './sdk.js';
 import { SECTORS, MAPS, MAX_FUEL, START_CREDITS, SCAVENGE_FUEL, jumpCost, DEVICE_VERSION, sector, PROTOCOL, chartedWorlds, chartBounds } from './protocol.js';
@@ -10,6 +11,7 @@ const $ = (id) => document.getElementById(id);
 const emptyLog = $('receipts').firstElementChild;
 const signer = new WedgieSigner('starproof');
 let state = { started: false, location: 'sol', fuel: MAX_FUEL, credits: START_CREDITS, maps: ['home'], refuelCost: 0, claims: [], receipts: [], sequence: 0 };
+const collectibles = mountCollectibles({ api, getState: () => state });
 let view = chartBounds(chartedWorlds(state.maps)), viewTarget = view;
 let selected = 'kepler', busy = false, deviceReady = false, cancelled = false;
 let ship = { x: 0.23, y: 0.54, heading: 0 }, noticeTimer;
@@ -71,6 +73,7 @@ for (const star of SECTORS) {
 }
 
 function render() {
+  collectibles.update();
   if (!state.maps.includes(sector(selected).map)) selected = state.location;
   viewTarget = chartBounds(visibleWorlds());
   canvas.parentElement.dataset.worlds = visibleWorlds().length;
