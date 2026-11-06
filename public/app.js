@@ -45,7 +45,7 @@ function render() {
   $('refuel').textContent = state.refuelCost ? 'Buy fuel · ' + state.refuelCost + ' credits' : 'Refuel · free planet cache';
   $('refuel').disabled = busy || !deviceReady || !state.started || state.fuel >= MAX_FUEL || state.credits < state.refuelCost;
   $('fuel-hint').textContent = 'Jumps cost 2–8 fuel by distance. ' + (state.refuelCost ? 'A full refill costs ' + state.refuelCost + ' credits. Scavenge if you are short.' : 'A free full-tank cache is waiting at ' + sector(state.location).name + '.');
-  $('scavenge').textContent = 'Scavenge +' + Math.min(SCAVENGE_FUEL, MAX_FUEL - state.fuel) + ' fuel';
+  $('scavenge').textContent = 'Scavenge up to ' + SCAVENGE_FUEL + ' fuel';
   $('scavenge').disabled = busy || !deviceReady || !state.started || state.fuel >= MAX_FUEL;
   const found = MAPS.find((map) => map.foundAt === selected);
   $('loot-note').textContent = state.claims.includes(selected) ? 'Artifact recovered. This planet’s loot is yours.' : 'Artifact loot: +4 credits' + (found ? ' + ' + found.name + ' star map.' : '.');
