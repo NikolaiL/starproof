@@ -109,6 +109,8 @@ Guides: [Wedgie skill](https://wedgie.dev/skill.md), [apps](https://wedgie.dev/c
 
 ## Captain, ship and monster collectibles
 
+Choose an installed wallet explicitly from the Wallet selector; wallet discovery uses EIP-6963 rather than relying on extension injection order. Connection requests time out after 60 seconds; pending transactions are never automatically retried.
+
 The browser now includes an ENS crew profile and optional **Base ERC721 monster collection**. These additions do not change the device package, device version, signed action protocol or installer pin. Existing device installations can authorize artifact recovery exactly as before.
 
 A monster becomes eligible after recovering its world's artifact with a genuine `trustm` claim receipt. The server rechecks the certificate, signature, original mission, origin, planet and action, then issues a five-minute EIP-712 voucher bound to chain, collection, canonical factory-key identity, world and recipient. A separate Ethereum browser wallet confirms the Base mint and pays gas. Unsigned demo claims are ineligible. Older signed receipts from before the verification label was introduced remain eligible after the same certificate, action and signature checks. The ERC721 contract permanently allows one token per chip/world even after transfers. It **trusts the server issuer** rather than verifying Infineon certificates onchain. No extra chip signature is requested, so the original device approval is an artifact recovery approval, not an NFT transaction approval.

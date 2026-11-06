@@ -66,7 +66,7 @@
     </section>
 
     <section class="crew-card" aria-labelledby="crew-title">
-      <div class="crew-heading"><div><p class="eyebrow">ENS crew registry · Ethereum</p><h2 id="crew-title">Your captain. Your ship.</h2><p id="crew-identity">No crew profile loaded.</p></div><div><button id="crew-connect" class="button">Connect wallet · Base</button> <a id="crew-wallet" hidden target="_blank" rel="noreferrer"></a></div></div>
+      <label>Wallet<select id="crew-provider" aria-label="Ethereum wallet"></select></label><div class="crew-heading"><div><p class="eyebrow">ENS crew registry · Ethereum</p><h2 id="crew-title">Your captain. Your ship.</h2><p id="crew-identity">No crew profile loaded.</p></div><div><button id="crew-connect" class="button">Connect wallet · Base</button> <a id="crew-wallet" hidden target="_blank" rel="noreferrer"></a></div></div>
       <p>Link two registered ENS names to your captain wallet. Their shared profile travels with your names.</p>
       <div class="crew-fields"><label>Captain ENS name<input id="crew-captain" value="starcaptain.eth" autocomplete="off" spellcheck="false" placeholder="starcaptain.eth"></label><label>Ship ENS name<input id="crew-ship" value="starship.starcaptain.eth" autocomplete="off" spellcheck="false" placeholder="starship.eth"></label></div>
       <p class="small-note">Both names must resolve to your wallet. Publishing writes one record per name in two wallet transactions. A partially completed profile can be retried. <a href="https://app.ens.domains" target="_blank" rel="noreferrer">Register or manage names ↗</a></p>

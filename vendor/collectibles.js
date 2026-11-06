@@ -7,15 +7,20 @@ export { profileNames, readProfile, base, mainnet };
 
 export async function connectWallet(provider, chain = base, progress = () => {}) {
   if (!provider) throw new Error('Open Starproof in a browser with an Ethereum wallet.');
+  const request = async args => {
+    let timer;
+    try { return await Promise.race([provider.request(args), new Promise((_, reject) => { timer = setTimeout(() => reject(new Error('Wallet connection timed out. Open your wallet or choose another wallet and try again.')), 60000); })]); }
+    finally { clearTimeout(timer); }
+  };
   progress('Connect your wallet to Starproof…');
-  const accounts = await provider.request({ method: 'eth_requestAccounts' });
+  const accounts = await request({ method: 'eth_requestAccounts' });
   if (!accounts[0]) throw new Error('Choose a wallet account.');
-  if (BigInt(await provider.request({ method: 'eth_chainId' })) !== BigInt(chain.id)) {
+  if (BigInt(await request({ method: 'eth_chainId' })) !== BigInt(chain.id)) {
     progress('Switch your wallet to ' + chain.name + '…');
-    await provider.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: toHex(chain.id) }] });
+    await request({ method: 'wallet_switchEthereumChain', params: [{ chainId: toHex(chain.id) }] });
   }
-  if (BigInt(await provider.request({ method: 'eth_chainId' })) !== BigInt(chain.id)) throw new Error('Switch your wallet to ' + chain.name + '.');
-  const current = await provider.request({ method: 'eth_accounts' });
+  if (BigInt(await request({ method: 'eth_chainId' })) !== BigInt(chain.id)) throw new Error('Switch your wallet to ' + chain.name + '.');
+  const current = await request({ method: 'eth_accounts' });
   if (String(current[0]).toLowerCase() !== String(accounts[0]).toLowerCase()) throw new Error('Wallet account changed. Reconnect before continuing.');
   const account = getAddress(current[0]);
   // ENS resolution stays in the user's wallet; no public RPC or third-party gateway is proxied by our server.

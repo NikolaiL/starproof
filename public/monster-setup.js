@@ -1,4 +1,6 @@
 import { connectWallet, deployMonsters, base } from '/vendor/collectibles.js';
+import { mountWalletPicker } from './wallets.js';
+const provider = mountWalletPicker(document.getElementById('monster-provider'));
 const button = document.getElementById('monster-deploy'), status = document.getElementById('monster-setup-status');
 let deployed = false;
 button.addEventListener('click', async () => {
@@ -7,7 +9,7 @@ button.addEventListener('click', async () => {
   status.textContent = 'Review Base deployment and gas in your wallet. Waiting for confirmation…';
   try {
     const progress = text => { status.textContent = text; };
-    const connection = await connectWallet(window.ethereum, base, progress);
+    const connection = await connectWallet(provider(), base, progress);
     const result = await deployMonsters(connection, document.getElementById('monster-issuer').value.trim(), progress);
     deployed = true;
     document.getElementById('monster-contract').textContent = 'Collection: ' + result.address;

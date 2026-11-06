@@ -28,6 +28,7 @@ for (const monster of MONSTERS) {
 }
 FILES['/monster-setup.html'] = ['monster-setup.html', 'text/html'];
 FILES['/monster-setup.js'] = ['monster-setup.js', 'text/javascript'];
+FILES['/wallets.js'] = ['wallets.js', 'text/javascript'];
 FILES['/collectibles.js'] = ['collectibles.js', 'text/javascript'];
 FILES['/monster-catalog.js'] = ['monster-catalog.js', 'text/javascript'];
 FILES['/vendor/collectibles.js'] = ['vendor/collectibles.js', 'text/javascript'];

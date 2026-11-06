@@ -1,5 +1,6 @@
 import { connectWallet, profileNames, readProfile, publishProfile, delegateLogbook, writeLogbook, mintMonster, mainnet } from '/vendor/collectibles.js';
 import { MONSTERS, hasEncounterProof } from './monster-catalog.js';
+import { mountWalletPicker } from './wallets.js';
 import { drawMonster } from './graphics.js';
 
 export function mountCollectibles({ api, getState }) {
@@ -9,6 +10,7 @@ export function mountCollectibles({ api, getState }) {
   const encounterKey = () => getState().device + ':' + $('monster-world').value;
   const buttons = ['crew-connect', 'crew-load', 'crew-publish', 'crew-grant', 'crew-revoke', 'crew-log-save', 'monster-mint'];
   function update() {
+    $('crew-provider').disabled = active;
     for (const id of buttons) $(id).disabled = active || (id !== 'crew-connect' && !connection);
     const eligible = MONSTERS.filter(monster => getState().receipts.some(receipt => receipt.target === monster.id && hasEncounterProof(receipt)));
     const previous = $('monster-world').value;
@@ -47,12 +49,12 @@ export function mountCollectibles({ api, getState }) {
     $('crew-tx').hidden = false;
   }
   $('crew-connect').addEventListener('click', () => run('crew-connect', 'Connecting wallet…', async () => {
-    connection = await connectWallet(window.ethereum);
+    connection = await connectWallet(provider(), undefined, text => { $('crew-status').textContent = text; });
     const link = $('crew-wallet'); link.textContent = connection.account.slice(0, 6) + '…' + connection.account.slice(-4) + ' ↗';
     link.href = 'https://basescan.org/address/' + connection.account; link.hidden = false;
     $('crew-status').textContent = 'Wallet connected to Base. Monster mints use Base ETH for gas; ENS writes use Ethereum.';
   }));
-  async function namingWallet() { connection = await connectWallet(window.ethereum, mainnet); return connection; }
+  async function namingWallet() { connection = await connectWallet(provider(), mainnet, text => { $('crew-status').textContent = text; }); return connection; }
   $('crew-load').addEventListener('click', () => run('crew-load', 'Reading ENS…', async () => {
     const current = await namingWallet(), epoch = generation;
     showProfile(await readProfile(current.client, names()), epoch);
@@ -79,7 +81,7 @@ export function mountCollectibles({ api, getState }) {
   }));
   $('monster-world').addEventListener('change', update);
   $('monster-mint').addEventListener('click', () => run('monster-mint', 'Minting monster…', async () => {
-    const current = connection = await connectWallet(window.ethereum), epoch = generation;
+    const current = connection = await connectWallet(provider(), undefined, text => { $('crew-status').textContent = text; }), epoch = generation;
     const voucher = await api('monsters/voucher', { world: $('monster-world').value, recipient: current.account });
     const hash = await mintMonster(current, voucher);
     if (generation !== epoch) throw new Error('Wallet changed. Check the mint transaction in your wallet.');
@@ -87,8 +89,14 @@ export function mountCollectibles({ api, getState }) {
     transaction(hash);
     $('crew-status').textContent = 'Monster NFT minted to your connected wallet on Base.';
   }));
-  window.ethereum?.on?.('accountsChanged', resetWallet);
-  window.ethereum?.on?.('chainChanged', resetWallet);
+  let observedProvider;
+  const provider = mountWalletPicker($('crew-provider'), next => {
+    observedProvider?.removeListener?.('accountsChanged', resetWallet);
+    observedProvider?.removeListener?.('chainChanged', resetWallet);
+    observedProvider = next;
+    next?.on?.('accountsChanged', resetWallet); next?.on?.('chainChanged', resetWallet);
+    resetWallet();
+  });
   function resetWallet() {
     generation++; connection = null; $('crew-wallet').hidden = true;
     $('crew-identity').textContent = 'No crew profile loaded.';
