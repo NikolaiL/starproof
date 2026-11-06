@@ -1,6 +1,6 @@
 # Hardware-controlled ERC-20 airdrop
 
-Status: proposed design, not implemented. The user selected an existing ERC-20; its network and contract address are pending. Each eligible Trust M chip should receive 1,000 tokens once per campaign.
+Status: proposed design, not implemented. The project token is being prepared for a Clanker launch; its network and deployed contract address are pending. See [the token branding draft](TOKEN_LAUNCH_DRAFT.md). Each eligible Trust M chip should receive 1,000 tokens once per campaign.
 
 ## Recommended device flow
 

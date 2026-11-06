@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="Starproof token: jelly pilot in a rocket, surrounded by stars">
+<defs>
+ <radialGradient id="bg"><stop stop-color="#3e2b64"/><stop offset=".68" stop-color="#1b162c"/><stop offset="1" stop-color="#090810"/></radialGradient>
+ <radialGradient id="nebula"><stop stop-color="#9976e1" stop-opacity=".6"/><stop offset="1" stop-color="#9976e1" stop-opacity="0"/></radialGradient>
+ <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#eeffb8"/><stop offset=".5" stop-color="#b9f559"/><stop offset="1" stop-color="#8bb758"/></linearGradient>
+ <radialGradient id="planet" cx=".25" cy=".2"><stop stop-color="#bff5e3"/><stop offset=".6" stop-color="#5a999f"/><stop offset="1" stop-color="#343954"/></radialGradient>
+</defs>
+<rect width="1024" height="1024" fill="#090810"/>
+<circle cx="512" cy="512" r="478" fill="url(#bg)" stroke="#292339" stroke-width="3"/>
+<circle cx="512" cy="512" r="448" fill="none" stroke="url(#rim)" stroke-width="9"/>
+<circle cx="512" cy="512" r="425" fill="none" stroke="#a3ac7a" stroke-width="1" opacity=".35"/>
+<ellipse cx="580" cy="420" rx="410" ry="420" fill="url(#nebula)"/>
+<g fill="#fff4db">
+ <circle cx="300" cy="216" r="4"/><circle cx="733" cy="238" r="4"/><circle cx="810" cy="515" r="3"/>
+ <circle cx="249" cy="643" r="4"/><circle cx="690" cy="825" r="3"/><circle cx="190" cy="399" r="3"/>
+ <circle cx="440" cy="165" r="2"/><circle cx="783" cy="362" r="2"/><circle cx="388" cy="840" r="2"/>
+</g>
+<g transform="translate(736 735)">
+ <circle r="112" fill="url(#planet)" stroke="#12101e" stroke-width="8"/>
+ <path d="M-68-56q28-35 52-2l-13 30-41 1zM18 14q38-21 54 5l-21 38-37-8z" fill="#a5bfa0" opacity=".55"/>
+ <ellipse rx="150" ry="31" transform="rotate(-25)" fill="none" stroke="#9cc9bb" stroke-width="8"/>
+</g>
+<g fill="none" transform="translate(-115 54) scale(3.9)">
+  <defs><radialGradient id="a"><stop stop-color="#8461df" stop-opacity=".5"/><stop offset="1" stop-color="#8461df" stop-opacity="0"/></radialGradient></defs>
+  <ellipse cx="160" cy="111" rx="150" ry="88" fill="url(#a)"/>
+  <ellipse cx="160" cy="122" rx="126" ry="43" stroke="#bba3ff" stroke-opacity=".5" stroke-width="2" transform="rotate(-18 160 122)"/>
+  <path d="m49 75 4 12 12 4-12 4-4 12-4-12-12-4 12-4zm212-39 3 9 9 3-9 3-3 9-3-9-9-3 9-3z" fill="#e3ff88"/>
+  <path d="m239 143 3 8 8 3-8 3-3 8-3-8-8-3 8-3z" fill="#ff9ac8"/>
+  <g transform="rotate(28 162 105)" stroke="#18152b" stroke-width="4" stroke-linejoin="round">
+    <path d="M143 142q-8 29 17 49 27-22 17-49" fill="#ff945f"/><path d="M151 146q-3 18 9 29 13-12 9-29" fill="#ffe6a8" stroke="none"/>
+    <path d="m140 95-29 36 5 25 31-21m35-40 29 36-5 25-31-21" fill="#b79aff"/>
+    <path d="M160 27q-34 25-26 108 26 21 52 0 8-83-26-108Z" fill="#fff3dc"/>
+    <path d="M160 27q-17 14-25 39h50q-8-25-25-39Z" fill="#ff93b7"/>
+    <path d="M139 128h42l-2 16h-38Z" fill="#aa94f4"/>
+    <circle cx="160" cy="97" r="25" fill="#8bdde1"/>
+    <path d="M143 101q0-31 17-30 18 0 18 30l-6-3-6 4-6-4-6 4-6-4Z" fill="#caff7a" stroke-width="2"/>
+    <ellipse cx="153" cy="87" rx="4" ry="6" fill="#fff" stroke-width="1.5"/><ellipse cx="168" cy="87" rx="4" ry="6" fill="#fff" stroke-width="1.5"/>
+    <circle cx="154" cy="88" r="2" fill="#18152b" stroke="none"/><circle cx="167" cy="88" r="2" fill="#18152b" stroke="none"/>
+    <path d="M156 96q5 5 10-1" stroke-width="2"/>
+    <path d="M142 79q7-12 16-12" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+    <path d="M151 112v12m19-12v12" stroke="#b3f46e" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <circle cx="81" cy="139" r="3" fill="#fff3dc"/><circle cx="233" cy="83" r="2" fill="#d4bbff"/><circle cx="99" cy="39" r="2" fill="#fff3dc"/>
+</g>
+<g fill="none" stroke="#d7ff63" stroke-width="7" stroke-linecap="round" transform="translate(245 343)">
+ <path d="M0-36v72M-36 0h72M-25-25l50 50M-25 25l50-50"/>
+</g>
+<path d="m754 196 9 26 26 9-26 9-9 26-9-26-26-9 26-9z" fill="#ff9ac8"/>
+<g transform="translate(205 732)">
+ <circle r="49" fill="#171322" stroke="#d7ff63" stroke-width="5"/>
+ <rect x="-22" y="-22" width="44" height="44" rx="8" fill="none" stroke="#d7ff63" stroke-width="4"/>
+ <path d="M-12-29v7M0-29v7M12-29v7M-12 22v7M0 22v7M12 22v7M-29-12h7M-29 0h7M-29 12h7M22-12h7M22 0h7M22 12h7" stroke="#d7ff63" stroke-width="4"/>
+ <path d="m-11 0 8 8L13-9" fill="none" stroke="#fff3dc" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+</svg>

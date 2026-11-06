@@ -11,6 +11,7 @@ const FILES = { '/': ['index.html', 'text/html'], '/style.css': ['style.css', 't
   '/apple-touch-icon.png': ['apple-touch-icon.png', 'image/png'],
   '/media/starproof-cover.png': ['media/starproof-cover.png', 'image/png'], '/media/starproof-cover.svg': ['media/starproof-cover.svg', 'image/svg+xml'],
   '/media/starproof-og.png': ['media/starproof-og.png', 'image/png'], '/media/starproof-og.svg': ['media/starproof-og.svg', 'image/svg+xml'],
+  '/media/starproof-token.png': ['media/starproof-token.png', 'image/png'], '/media/starproof-token.svg': ['media/starproof-token.svg', 'image/svg+xml'],
   '/launch-crew.svg': ['launch-crew.svg', 'image/svg+xml'],
   '/app.js': ['app.js', 'text/javascript'], '/graphics.js': ['graphics.js', 'text/javascript'], '/navigation.js': ['navigation.js', 'text/javascript'], '/approval.js': ['approval.js', 'text/javascript'],
   '/device-install.json': ['device-install.json', 'application/json'], '/vendor/installer.js': ['vendor/installer.js', 'text/javascript'],

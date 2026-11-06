@@ -4,6 +4,7 @@
 | --- | --- | --- |
 | Hackathon cover | 1600×900 | [PNG](../public/media/starproof-cover.png) · [editable SVG](../public/media/starproof-cover.svg) |
 | Open Graph / social card | 1200×630 | [PNG](../public/media/starproof-og.png) · [editable SVG](../public/media/starproof-og.svg) |
+| Proposed token avatar | 1024×1024 | [PNG](../public/media/starproof-token.png) · [editable SVG](../public/media/starproof-token.svg) |
 | Favicon | Scalable | [SVG](../public/favicon.svg) |
 | Browser fallback | 16×16 and 32×32 | [ICO](../public/favicon.ico) |
 | PNG favicon | 16×16 / 32×32 | [16 px](../public/favicon-16.png) · [32 px](../public/favicon-32.png) |

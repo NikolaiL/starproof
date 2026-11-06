@@ -246,7 +246,7 @@ test('HTTP serves the game, isolates sessions and refuses cross-origin, oversize
   assert.match(html, /property="og:image" content="https:\/\/starproof-wedgie.vercel.app\/media\/starproof-og.png"/);
   assert.match(html, /rel="icon" href="\/favicon.svg"/);
   assert.match(page.headers.get('content-security-policy'), /frame-ancestors 'none'/);
-  for (const [asset, width, height] of [['/media/starproof-cover.png',1600,900],['/media/starproof-og.png',1200,630],['/favicon-16.png',16,16],['/favicon-32.png',32,32],['/apple-touch-icon.png',180,180]]) {
+  for (const [asset, width, height] of [['/media/starproof-cover.png',1600,900],['/media/starproof-og.png',1200,630],['/media/starproof-token.png',1024,1024],['/favicon-16.png',16,16],['/favicon-32.png',32,32],['/apple-touch-icon.png',180,180]]) {
     const response = await fetch(base + asset);
     assert.equal(response.status, 200);
     assert.match(response.headers.get('content-type'), /image\/png/);
