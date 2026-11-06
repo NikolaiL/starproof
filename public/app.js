@@ -1,3 +1,4 @@
+import { mountAirdrop } from './airdrop.js';
 import { WedgieSigner } from './sdk.js';
 import { SECTORS, MAPS, MAX_FUEL, START_CREDITS, SCAVENGE_FUEL, jumpCost, DEVICE_VERSION, sector, PROTOCOL, chartedWorlds, chartBounds } from './protocol.js';
 import { drawPlanet, drawMonster, drawShip, drawBackdrop, drawJourney, journeyFrame, drawConfetti, shipHeading, journeyHeading } from './graphics.js';
@@ -189,6 +190,15 @@ for (const input of document.querySelectorAll('[data-confirmation]')) input.addE
   catch (error) { state.confirmations = previous; notice(error.message); }
   finally { busy = false; render(); }
 });
+async function deviceJob(work) {
+  if (busy) return;
+  if (!deviceReady && !await connectDevice()) return;
+  busy = true; deviceInput = null; render();
+  try { if (statsUpdate) await statsUpdate; await work(); }
+  catch (error) { notice(error.message); }
+  finally { busy = false; render(); void syncDeviceStats(); }
+}
+mountAirdrop({ signer, api, deviceJob, notice });
 $('connect').addEventListener('click', connectDevice);
 signer.addEventListener('disconnect', () => {
   deviceInput = null;

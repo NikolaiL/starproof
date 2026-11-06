@@ -6,6 +6,9 @@ const license = '/*!\n' + await readFile(new URL('../vendor/WEDGIE-LICENSE.txt',
 await mkdir(new URL('../public/vendor/', import.meta.url), { recursive: true });
 await build({ entryPoints: ['vendor/wedgie3d.ts'], bundle: true, format: 'esm', minify: true, target: 'es2022', outfile: 'public/vendor/wedgie3d.js', legalComments: 'eof', banner: { js: license } });
 await build({ entryPoints: ['vendor/starproof-installer.ts'], bundle: true, format: 'esm', minify: true, target: 'es2022', outfile: 'public/vendor/installer.js', legalComments: 'eof', banner: { js: license } });
+await build({ entryPoints: ['vendor/airdrop-wallet.ts'], bundle: true, format: 'esm', minify: true, target: 'es2022', outfile: 'public/vendor/airdrop-wallet.js' });
+const drop = JSON.parse(await readFile(new URL('../lib/airdrop-artifact.json', import.meta.url), 'utf8'));
+await writeFile(new URL('../public/airdrop-deploy.json', import.meta.url), JSON.stringify({ abi: drop.abi, bytecode: drop.bytecode }));
 await copyFile(new URL(import.meta.resolve('wedgie-actions/browser')), new URL('../public/sdk.js', import.meta.url));
 const root = new URL('.', import.meta.resolve('starproof-device/package.json'));
 const metadata = JSON.parse(await readFile(new URL('package.json', root)));

@@ -1,0 +1,5 @@
+lib/forge-std/
+out/
+cache/
+broadcast/
+screenshots/

@@ -12,7 +12,10 @@
     "test": "node --test test/*.test.js",
     "pretest": "npm run build",
     "build": "node tools/build.js",
-    "prestart": "npm run build"
+    "prestart": "npm run build",
+    "contracts:build": "forge build && node tools/sync-airdrop.js",
+    "test:contracts": "forge test",
+    "test:fork": "node --test --test-concurrency=1 test/airdrop.test.js test/token-fork.test.js"
   },
   "license": "MIT",
   "repository": {
@@ -22,10 +25,12 @@
   "homepage": "https://github.com/NikolaiL/starproof#readme",
   "dependencies": {
     "three": "^0.187.0",
-    "wedgie-actions": "https://codeload.github.com/NikolaiL/wedgie-actions/tar.gz/032b8e1a69907b73a0d2617b825a0a19c826bcfe"
+    "viem": "2.57.16",
+    "wedgie-actions": "https://codeload.github.com/NikolaiL/wedgie-actions/tar.gz/0fcadb3a79c60b64ab4f9b5a63fb67796b81d4a4"
   },
   "devDependencies": {
+    "@openzeppelin/contracts": "5.6.1",
     "esbuild": "^0.28.2",
-    "starproof-device": "https://codeload.github.com/NikolaiL/wedgie-starproof/tar.gz/dd62d604a8a6f02a5fdd9b0aa6a969af993e498d"
+    "starproof-device": "https://codeload.github.com/NikolaiL/wedgie-starproof/tar.gz/80bdad6b3d6379860bdc7c2f121fe1d7931fe07e"
   }
 }

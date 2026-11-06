@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { RedisSessions } from '../lib/sessions.js';
+import { RedisSessions, MemorySessions } from '../lib/sessions.js';
 
 test('shared sessions restore across instances and atomically consume a pending challenge once', async (t) => {
   const records = new Map(), calls = [];
@@ -66,4 +66,21 @@ test('shared storage failures never report a successful mutation', async (t) => 
   t.mock.method(globalThis, 'fetch', async () => Response.json({ error: 'storage failure' }, { status: 500 }));
   const store = new RedisSessions('https://test.invalid', 'not-a-real-token');
   await assert.rejects(store.run('a'.repeat(64), {}, () => true), /storage is unavailable/);
+});
+
+
+test('local sessions serialize asynchronous updates without dropping either mutation', async () => {
+  const store = new MemorySessions();
+  const first = await store.run(null, {}, session => { session.counter = 0; return true; });
+  let entered;
+  const slow = store.run(first.id, {}, async session => {
+    const previous = session.counter;
+    await new Promise(resolve => { entered = resolve; });
+    session.counter = previous + 1;
+    return session.counter;
+  });
+  await new Promise(resolve => setImmediate(resolve));
+  const next = store.run(first.id, {}, async session => { session.counter++; return session.counter; });
+  entered();
+  assert.deepEqual((await Promise.all([slow,next])).map(result => result.result),[1,2]);
 });

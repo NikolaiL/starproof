@@ -7,3 +7,5 @@ Copyright (c) 2026 Austin Griffith; MIT, see `WEDGIE-LICENSE.txt`. The only rend
 `repl.ts`, `files.ts`, and `FREE_PY` in `free-app.ts` are reused from the same pinned Wedgie commit under the same license. `starproof-installer.ts` is Starproof's restricted integration: it writes only the four pinned app modules and selects Starproof after a physical full-control approval. The compiled files include the upstream license.
 
 The integration waits for the installed app using read-only firmware `hello` requests. A replacement USB port is returned only after its board ID matches the originally selected device and it reports Starproof running; the signer then checks its normal app handshake.
+
+`lib/safe.js` also reuses the MIT signer-address derivation constants from [wedgie-safe/safe_addr.py](https://github.com/clawdbotatg/wedgie-safe/blob/0b1c19cb095ea433db29202c4a090b6dddc332b6/safe_addr.py). Its Safe 1.4.1 bytecode hashes were independently extracted from `@safe-global/safe-contracts` 1.4.1-2 artifacts; no Safe contract source is copied into the web runtime.

@@ -3,10 +3,10 @@ import { busy, writeFile, unb64 } from './files';
 import { FREE_PY } from './free-app';
 
 export async function validateBundle(bundle: any) {
-  if (bundle.app?.mod !== 'starproof' || bundle.version !== '0.4.3' || !/^[a-f0-9]{40}$/.test(bundle.commit) || !Array.isArray(bundle.files) || bundle.files.length !== 4) throw new Error('Invalid Starproof install bundle.');
+  if (bundle.app?.mod !== 'starproof' || bundle.version !== '0.5.0' || !/^[a-f0-9]{40}$/.test(bundle.commit) || !Array.isArray(bundle.files) || bundle.files.length !== 5) throw new Error('Invalid Starproof install bundle.');
   const names = new Set(); let total = 0;
   for (const file of bundle.files) {
-    if (!['starproof.py', 'starproof_protocol.py', 'starproof_art.py', 'starproof_actions.py'].includes(file.name) || names.has(file.name)) throw new Error('Unsafe install filename.');
+    if (!['starproof.py', 'starproof_protocol.py', 'starproof_art.py', 'starproof_actions.py', 'starproof_claim.py'].includes(file.name) || names.has(file.name)) throw new Error('Unsafe install filename.');
     names.add(file.name);
     const bytes = unb64(file.data); total += bytes.length;
     const digest = [...new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))].map((v) => v.toString(16).padStart(2, '0')).join('');

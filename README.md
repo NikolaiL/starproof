@@ -26,7 +26,7 @@ Tests also require OpenSSL and Python 3. They create an ephemeral test CA, exerc
 
 ## Install the Wedgie app
 
-**Connect Wedgie** checks the installed app. If it is missing or outdated, the browser shows the exact GitHub revision and asks the device to install it. Press the physical green button on Wedgie’s **FULL CONTROL** prompt; red declines. After writing and checking the four app files, it restarts and connects to Starproof. Desktop Chrome/Edge and firmware 0.3.76+ are required.
+**Connect Wedgie** checks the installed app. If it is missing or outdated, the browser shows the exact GitHub revision and asks the device to install it. Press the physical green button on Wedgie’s **FULL CONTROL** prompt; red declines. After writing and checking the five app files, it restarts and connects to Starproof. Desktop Chrome/Edge and firmware 0.3.76+ are required.
 
 After installation, the browser waits up to 15 seconds for the same board to report Starproof running. If the restart replaces its USB port, it finds that board among ports already authorized for the game and reconnects without another picker or installation prompt.
 
@@ -48,7 +48,7 @@ Only one tab or serial tool can hold the Wedgie USB connection. If the port cann
 
 ### Hardware navigation
 
-With device app **0.4.3**, the joystick flies the browser spaceship and its press toggles planet info. Green launches or travels to the selected planet; the second button refuels; the third scavenges; red scans. Shortcuts use the same game rules and confirmation settings as browser buttons. In an approval prompt, green confirms and red declines; opening that prompt never counts as its approval. The idle device screen shows browser-supplied game stats, separately from validated signing previews.
+With device app **0.5.0**, the joystick flies the browser spaceship and its press toggles planet info. Green launches or travels to the selected planet; the second button refuels; the third scavenges; red scans. Shortcuts use the same game rules and confirmation settings as browser buttons. In an approval prompt, green confirms and red declines; opening that prompt never counts as its approval. The idle device screen shows browser-supplied game stats, separately from validated signing previews.
 
 ### Demo confirmation settings
 
@@ -58,9 +58,17 @@ The dark confirmation window has stars and passing comets. Its animated hardware
 
 The red button declines. **Cancel request in browser** invalidates the server challenge and sends an ID-scoped cancel command to dismiss the Wedgie prompt without signing. Reinstall the updated device app for this feature; older copies block USB inside the prompt. A response already signed cannot be recalled, so the browser discards it after cancellation. An emulator may preview the app UI but cannot pass the production certificate check or start a mission.
 
-The economy update preserves existing discoveries, tops the tank up once, and discards pending approvals made under the old prices. The expanded chart also grants new maps earned by previously collected artifacts. Reconnect to install device app 0.4.3, which independently checks each route’s fuel cost.
+The economy update preserves existing discoveries, tops the tank up once, and discards pending approvals made under the old prices. The expanded chart also grants new maps earned by previously collected artifacts. Reconnect to install device app 0.5.0, which independently checks each route’s fuel cost.
 
 Local games use process memory and disappear on restart. The Vercel deployment uses private Upstash Redis state with a two-hour idle expiry and atomic compare-and-set updates, so independent function instances cannot consume a challenge twice. Browser cookies identify the local session; returning to the same cookie resumes it and signed actions still require the original chip.
+
+## Hardware token drop
+
+[STARPROOF](https://basescan.org/token/0x469F27BC9CA19d78455867aAFc7aA4186d3cCccC) is deployed on Base mainnet with 18 decimals. The prepared airdrop pays 1,000 tokens once per verified chip to a user-selected Safe. It stays disabled until the separate distributor and claim service are configured and funded.
+
+Device app 0.5.0 reuses the already initialized Safe key and factory identity inside Starproof. It reviews the token and full recipient on two physical approval screens without app switching or wallet-key writes. The server verifies both proofs and Safe ownership; a fixed-amount distributor records the canonical factory-key claim ID permanently onchain. Demo confirmation switches do not apply to token claims.
+
+See [setup, trust boundaries and fork tests](docs/AIRDROP_DESIGN.md). The [administrator page](https://starproof-wedgie.vercel.app/airdrop-setup.html) prepares deploy and funding requests for the token deployment wallet. It never receives a private key. Mainnet deployment, funding and physical claim testing remain pending.
 
 ## Toolkit layout
 

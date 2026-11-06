@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { MemorySessions, RedisSessions } from './lib/sessions.js';
 import { trustM } from 'wedgie-actions/server';
+import { createAirdrop } from './lib/airdrop.js';
 
 const PUBLIC = new URL('./public/', import.meta.url);
 const FILES = { '/': ['index.html', 'text/html'], '/style.css': ['style.css', 'text/css'],
@@ -17,13 +18,15 @@ const FILES = { '/': ['index.html', 'text/html'], '/style.css': ['style.css', 't
   '/device-install.json': ['device-install.json', 'application/json'], '/vendor/installer.js': ['vendor/installer.js', 'text/javascript'],
   '/wedgie-model.js': ['wedgie-model.js', 'text/javascript'], '/vendor/wedgie3d.js': ['vendor/wedgie3d.js', 'text/javascript'],
   '/3d/wedgie.json': ['3d/wedgie.json', 'application/json'], '/3d/wedgie.bin': ['3d/wedgie.bin', 'application/octet-stream'],
-  '/sdk.js': [new URL(import.meta.resolve('wedgie-actions/browser')), 'text/javascript'], '/protocol.js': ['protocol.js', 'text/javascript'] };
-const ROUTES = new Set(['GET /api/state', 'POST /api/device', 'POST /api/challenge', 'POST /api/commit', 'POST /api/cancel', 'POST /api/settings', 'POST /api/act']);
+  '/airdrop-setup.html': ['airdrop-setup.html', 'text/html'], '/airdrop-setup.js': ['airdrop-setup.js', 'text/javascript'], '/airdrop-deploy.json': ['airdrop-deploy.json', 'application/json'], '/vendor/airdrop-wallet.js': ['vendor/airdrop-wallet.js', 'text/javascript'],
+  '/airdrop.js': ['airdrop.js', 'text/javascript'], '/token.js': ['token.js', 'text/javascript'], '/sdk.js': [new URL(import.meta.resolve('wedgie-actions/browser')), 'text/javascript'], '/protocol.js': ['protocol.js', 'text/javascript'] };
+const ROUTES = new Set(['GET /api/state', 'POST /api/device', 'POST /api/challenge', 'POST /api/commit', 'POST /api/cancel', 'POST /api/settings', 'POST /api/act', 'GET /api/airdrop', ...['wallets','status','challenge','proof','submit','cancel'].map(path => 'POST /api/airdrop/' + path)]);
 
 // Tests pass an ephemeral test PKI; the running server always uses the production verifier.
-export function createHandler(verifier = trustM, { store, origin: configuredOrigin = process.env.APP_ORIGIN } = {}) {
+export function createHandler(verifier = trustM, { store, airdrop: providedAirdrop, origin: configuredOrigin = process.env.APP_ORIGIN } = {}) {
   if (process.env.VERCEL && !store && !(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN)) throw new Error('Shared mission storage is required on Vercel.');
   const sessions = store || (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN ? new RedisSessions(process.env.KV_REST_API_URL, process.env.KV_REST_API_TOKEN) : new MemorySessions());
+  const airdrop = providedAirdrop || createAirdrop({store:sessions,verifier});
   return async (req, res) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Referrer-Policy', 'no-referrer');
@@ -61,8 +64,12 @@ export function createHandler(verifier = trustM, { store, origin: configuredOrig
         }
         if (!body || Array.isArray(body) || typeof body !== 'object') return json({ error: 'Expected an object.' }, 400);
       }
+      if (path === '/api/airdrop') {
+        res.setHeader('Cache-Control', 'public, max-age=5, s-maxage=5');
+        return json(await airdrop.config());
+      }
       const cookie = /(?:^|;\s*)starproof=([0-9a-f]{64})(?:;|$)/.exec(req.headers.cookie || '')?.[1];
-      const transaction = await sessions.run(cookie, verifier, (session) => {
+      const transaction = await sessions.run(cookie, verifier, async (session) => {
         const reply = (data, code = 200) => ({ data, code });
         const now = Date.now(); session.last = now;
         if (path === '/api/state') return reply(session.game.state());
@@ -70,6 +77,7 @@ export function createHandler(verifier = trustM, { store, origin: configuredOrig
         if (session.requests.length >= 30) return reply({ error: 'Too many requests. Wait a minute.' }, 429);
         session.requests.push(now);
         try {
+          if (path.startsWith('/api/airdrop/')) return reply(await airdrop.handle(path,session,body,origin));
           if (path === '/api/settings') return reply(session.game.setConfirmations(body));
           if (path === '/api/act') return reply(session.game.act(body.action, body.target));
           if (path === '/api/device') return reply({ fingerprint: verifier.identity(body.cert).fingerprint });
@@ -79,6 +87,9 @@ export function createHandler(verifier = trustM, { store, origin: configuredOrig
         } catch (error) { return reply({ error: error.message || 'Request failed.' }, 400); }
       }, process.env.VERCEL ? req.headers['x-forwarded-for'] || '' : 'local');
       if (transaction.created) res.setHeader('Set-Cookie', `starproof=${transaction.id}; HttpOnly; SameSite=Strict; Path=/${origin.startsWith('https:') ? '; Secure' : ''}`);
+      if (transaction.result.code === 200 && transaction.result.data?.relay) {
+        return json(await airdrop.submit(transaction.result.data.relay));
+      }
       json(transaction.result.data, transaction.result.code);
     } catch (error) {
       json({ error: error.message || 'Request failed.' }, error.status || 400);

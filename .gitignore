@@ -13,3 +13,9 @@ screenshots/
 public/vendor/
 public/sdk.js
 public/device-install.json
+
+out/
+cache/
+broadcast/
+
+public/airdrop-deploy.json

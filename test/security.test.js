@@ -262,6 +262,10 @@ test('HTTP serves the game, isolates sessions and refuses cross-origin, oversize
     assert.equal(response.status, 200);
     assert.match(response.headers.get('content-type'), /javascript/);
   }
+  const dropConfig = await fetch(base + '/api/airdrop');
+  assert.equal(dropConfig.status, 200);
+  assert.equal(dropConfig.headers.get('set-cookie'), null, 'public drop configuration must not race the mission cookie');
+  assert.equal((await dropConfig.json()).enabled, false);
   const sdk = await fetch(base + '/sdk.js');
   assert.equal(sdk.status, 200);
   const sdkText = await sdk.text();

@@ -31,7 +31,15 @@ The first-run installer writes only the pinned Starproof app files and `apps.jso
 4. **Physical possession:** someone holding the Wedgie may use its factory key. There is no PIN, chip revocation or recovery flow in this prototype.
 5. **CA/revocation:** certificate dates and the pinned two-level chain are checked. CRLs/OCSP, production enrollment policy, CA rotations and compromised-device revocations are not implemented. See the certificate provenance in the [toolkit CA provenance](https://github.com/NikolaiL/wedgie-actions/tree/main/certs).
 6. **Privacy:** the factory certificate is a stable identifier. A verifier can link its uses. Exported receipts include that certificate and should not be treated as anonymous.
-7. **Prototype state:** local sessions are memory-only; deployed sessions use private Redis with two-hour idle expiry and atomic challenge consumption. Browser flight/scan state is cosmetic. No multiplayer, real economic rewards, account recovery or security audit is included.
+7. **Prototype state:** local sessions are memory-only; deployed sessions use private Redis with two-hour idle expiry and atomic challenge consumption. Browser flight/scan state is cosmetic. No multiplayer, account recovery or independent security audit is included. The separately funded token drop has the additional boundaries below.
+
+## Token airdrop boundaries
+
+The Base distributor fixes the token and 1,000-token payout, binds authorizations to its chain, contract, recipient and deadline, and permanently records a campaign-scoped hash of the certified factory public key. Certificate DER hashes are unsuitable for eligibility: ECDSA certificate signature malleability can change them without changing the certified chip key.
+
+The backend verifies the production certificate chain, Safe-key proof and factory-key binding before issuing an EIP-712 authorization. It accepts deployed canonical Safe 1.4.1 proxies whose owner is the Wedgie-derived P-256 signer. This deliberately excludes unsupported Safe versions and undeployed addresses. The stock device app reads existing locked keys and requires two physical approvals; gameplay confirmation switches cannot bypass this flow. Test PKI and public test keys are confined to tests.
+
+The contract trusts its configured proof issuer; it does not verify certificates or firmware onchain. A compromised issuer can authorize invented device IDs and drain the funded allocation. Keep its server secret isolated and its relay wallet dedicated to this distributor; the administrator can pause claims and rotate the issuer while paused. Funding limits exposure. The relayer needs Base ETH, persists signed bytes before broadcast, and serializes nonces through private Redis. A persistently underpriced transaction needs operator replacement. Cancellation revokes unsubmitted server authorizations; it cannot retract a broadcast transaction. Claim IDs and recipients are public and linkable. See [deployment and fork checks](docs/AIRDROP_DESIGN.md).
 
 ## Possible contract extension (not implemented)
 
