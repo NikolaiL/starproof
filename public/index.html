@@ -3,57 +3,80 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#0b1118">
-  <title>Starproof — a mission you sign</title>
+  <meta name="theme-color" content="#111124">
+  <title>Starproof — space gets weird</title>
   <link rel="stylesheet" href="/style.css">
   <script type="module" src="/app.js"></script>
 </head>
 <body>
   <header>
-    <a class="brand" href="/" aria-label="Starproof home"><span class="brandmark">✳</span> STARPROOF<span class="edition">FLIGHT TEST / 001</span></a>
+    <a class="brand" href="/" aria-label="Starproof home"><span class="brandmark">✳</span> STARPROOF<span class="edition">ODD LITTLE SPACE ADVENTURE</span></a>
     <div class="header-right"><span id="trust-status" class="status">AWAITING LAUNCH</span><button id="connect" class="button compact">Connect Wedgie <span>↗</span></button></div>
   </header>
   <main>
     <section class="intro">
-      <div><p class="eyebrow">DEEP SPACE. REAL HARDWARE.</p><h1>A mission<br>you <em>sign.</em></h1></div>
-      <div class="intro-copy"><p>Explore without interruption.<br> Put your signature on the decisions that matter.</p><p class="signature-rule"><span class="dot"></span> LAUNCH · JUMP · CLAIM</p></div>
-      <div class="coordinates">DEEP FIELD<br>RA 19h 28m<br>DEC +42° 36′</div>
+      <div><p class="eyebrow">REAL CHIP. UNREAL UNIVERSE.</p><h1>SPACE GETS<br><em>WEIRD.</em><span class="title-spark" aria-hidden="true">✳</span></h1></div>
+      <div class="intro-copy"><span class="comic-stamp">YOU ARE THE CAPTAIN.</span><p>Meet questionable lifeforms.<br> Collect impossible things.<br> Sign the big decisions.</p><p class="signature-rule"><span class="dot"></span> LAUNCH · JUMP · REFUEL · CLAIM</p></div>
+      <div class="coordinates">EST. 2026<br>PROBABLY HABITABLE.<br>DEFINITELY WEIRD.</div>
     </section>
 
     <div class="workspace">
       <aside class="console" aria-label="Mission controls">
         <div class="panel-title"><span>01 / FLIGHT CONSOLE</span><span class="live-dot"></span></div>
         <div class="ship-emblem" aria-hidden="true"><svg viewBox="0 0 180 110"><g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M90 12 108 63 146 85 112 85 101 75 90 94 79 75 68 85 34 85 72 63Z"/><path d="m90 12 0 82M72 63l18 9 18-9M82 51h16M79 75l11-19 11 19"/><circle cx="90" cy="61" r="47" stroke-dasharray="2 7" opacity=".35"/></g></svg></div>
-        <p class="eyebrow ship-label">EXPLORATION VESSEL</p><h2>Wayfarer <span>01</span></h2>
-        <div class="ship-stats"><div><span>JUMP FUEL</span><strong id="fuel">08 <small>/ 08</small></strong></div><div><span>ARTIFACTS</span><strong id="artifact-count">00 <small>/ 04</small></strong></div></div>
-        <div class="device-card"><span class="eyebrow">SIGNING DEVICE</span><p id="device-status">No Wedgie connected</p><span id="device-detail">Your factory key stays on the chip.</span></div>
-        <button id="launch" class="button primary full">Authorize expedition <span>↗</span></button>
+        <p class="eyebrow ship-label">YOUR TRUSTY SPACE BUCKET</p><h2>Wayfarer <span>01</span></h2>
+        <div class="ship-stats"><div><span>JUMP FUEL</span><strong id="fuel">01 <small>/ 01</small></strong></div><div><span>ARTIFACTS</span><strong id="artifact-count">00 <small>/ 06</small></strong></div></div>
+        <div class="fuel-depot"><p><span>SPACE CREDITS</span><strong id="credits">6</strong></p><button id="refuel" class="button full" disabled>Refuel at Sol</button><p id="fuel-hint" class="small-note">One jump per tank. A free cache on each planet, then 3 credits per refill.</p></div>
+        <div class="device-card"><span class="eyebrow">SIGNING DEVICE</span><p id="device-status">No Wedgie connected</p><span id="device-detail">Your factory key stays on the chip.</span><p class="first-run">First run? Review the code below. Connect installs Starproof if needed; approve on your Wedgie.</p><a class="source-link" href="https://github.com/NikolaiL/wedgie-starproof/tree/main/device" target="_blank" rel="noreferrer">Review device code on GitHub ↗</a><a class="source-link" href="https://github.com/NikolaiL/wedgie-starproof#install-through-wedgiedev" target="_blank" rel="noreferrer">Installation guide ↗</a></div>
+        <button id="launch" class="button primary full">Let’s launch <span>↗</span></button>
         <p id="mission-hint" class="small-note">A real Trust M signature is required to leave Sol.</p>
-        <div class="controls-note"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><span>or arrows to fly</span><br><kbd>SPACE</kbd><span>scan nearby signals</span><p>Flying, scanning and inspecting the map never ask for a signature.</p></div>
+        <button id="signing-help" class="text-button">How do the buttons work? ↗</button><div class="controls-note"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><span>or arrows to fly</span><br><kbd>SPACE</kbd><span>scan nearby signals</span><p>Flying, scanning and inspecting the map never ask for a signature.</p></div>
       </aside>
 
       <section class="chart" aria-label="Star map">
-        <div class="chart-toolbar"><div><span class="eyebrow">NAVIGATION CHART</span><h2 id="chart-title">The near unknown</h2></div><span id="location-tag" class="tag">SOL SYSTEM</span></div>
-        <div class="canvas-wrap"><canvas id="space" tabindex="0" aria-label="Interactive star map. Use the destination buttons below to select a star system, then authorize a jump."></canvas><div id="map-overlay"><span class="crosshair">＋</span><p>Your expedition begins<br>with a signature.</p></div><div class="chart-scale">1 px ≈ 0.03 light years <span>·</span> LOCAL CHART</div></div>
+        <div class="chart-toolbar"><div><span class="eyebrow">NAVIGATION CHART</span><h2 id="chart-title">Pick your kind of weird.</h2></div><span id="location-tag" class="tag">SOL SYSTEM</span></div>
+        <nav id="maps" class="maps" aria-label="Recovered star maps"></nav><p id="map-hint" class="map-hint"></p>
+        <div class="canvas-wrap"><canvas id="space" tabindex="0" aria-label="Interactive star map. Use the destination buttons below to select a star system, then authorize a jump."></canvas><div id="map-overlay"><span class="launch-sticker">NEXT STOP:<br>THE UNKNOWN <span aria-hidden="true">↗</span></span><p>One signature. A whole lot of space.</p></div><button id="scan" class="scan-button" disabled>◎ Send a sonar ping <kbd>SPACE</kbd></button><div id="scan-readout" class="scan-readout" role="status" aria-live="polite"></div></div>
         <nav id="destinations" aria-label="Select a destination"></nav>
       </section>
 
       <aside class="destination" aria-label="Selected destination">
         <div class="panel-title"><span>02 / DESTINATION</span><span>↗</span></div>
-        <div id="planet" class="planet" aria-hidden="true"></div>
+        <div class="planet-stage"><canvas id="planet" width="300" height="225" aria-hidden="true"></canvas><span class="portrait-sticker" aria-hidden="true">SAY HELLO.</span></div>
         <p id="world-type" class="eyebrow">HOME SYSTEM</p><h2 id="destination-name">Sol</h2><p id="destination-description" class="description">Home signal. The last familiar light.</p>
-        <dl class="destination-facts"><div><dt>LANDMARK</dt><dd id="landmark">Luna</dd></div><div><dt>STATUS</dt><dd id="destination-state">Unexplored</dd></div><div><dt>JUMP COST</dt><dd id="jump-cost">—</dd></div></dl>
-        <button id="jump" class="button full">Commit jump <span>↗</span></button>
-        <button id="claim" class="button full subtle">Claim artifact <span>＋</span></button>
-        <p class="small-note">These decisions ask for the green button on your Wedgie.</p>
+        <div id="resident-card" class="resident-card"><span class="eyebrow">LOCAL LIFEFORM</span><h3 id="resident-name">Clear skies</h3><p id="resident-note">No monsters. Yet.</p></div><dl class="destination-facts"><div><dt>LANDMARK</dt><dd id="landmark">Luna</dd></div><div><dt>STATUS</dt><dd id="destination-state">Unexplored</dd></div><div><dt>JUMP COST</dt><dd id="jump-cost">—</dd></div></dl>
+        <button id="jump" class="button full">Jump here <span>↗</span></button>
+        <button id="claim" class="button full subtle">Bag the artifact <span>＋</span></button>
+        <p id="loot-note" class="small-note">These decisions ask for the green button on your Wedgie.</p>
       </aside>
     </div>
 
-    <section class="flight-log"><div class="log-heading"><div><p class="eyebrow">03 / EXPEDITION RECORD</p><h2>Every commitment leaves a trace.</h2></div><button id="export" class="text-button" disabled>Export signed receipts ↗</button></div><ol id="receipts"><li class="empty-log"><span>—</span>No signed actions yet. Connect a Wedgie to begin.</li></ol></section>
+    <section class="flight-log"><div class="log-heading"><div><p class="eyebrow">03 / EXPEDITION RECORD</p><h2>Your very official space diary.</h2></div><button id="export" class="text-button" disabled>Export signed receipts ↗</button></div><ol id="receipts"><li class="empty-log"><span>—</span>No signed actions yet. Connect a Wedgie to begin.</li></ol></section>
     <section class="verification-note"><span class="seal">◎</span><p><strong>Proof of a chip, not proof of a person.</strong> The server checks the Infineon certificate chain, the exact action and a fresh challenge. It cannot attest the device firmware or prove a human pressed the button.</p><a href="https://wedgie.dev/trustm.md" target="_blank" rel="noreferrer">Meet the hardware ↗</a></section>
   </main>
-  <footer><span>STARPROOF / EXPERIMENTAL FLIGHT SOFTWARE</span><span>NO TOKENS. NO TRANSACTION FEES. JUST SPACE.</span></footer>
+  <footer><span>STARPROOF / EXPERIMENTAL FLIGHT SOFTWARE · <a href="https://github.com/NikolaiL/starproof" target="_blank" rel="noreferrer">GITHUB ↗</a></span><span>NO TOKENS. NO TRANSACTION FEES. JUST SPACE.</span></footer>
   <div id="notice" role="status" aria-live="polite" hidden></div>
-  <dialog id="approval" aria-labelledby="approval-title"><div class="approval-icon">✳</div><p class="eyebrow">PHYSICAL CONFIRMATION</p><h2 id="approval-title">Check your Wedgie.</h2><p id="approval-description"></p><div class="button-legend"><span><i class="green"></i> green to sign</span><span><i class="red"></i> red to decline</span></div><p class="small-note">The request expires automatically. Nothing happens without a valid signature.</p><button id="cancel" class="button full subtle">Cancel request</button></dialog>
+  <dialog id="approval" aria-labelledby="approval-title" aria-describedby="approval-description">
+    <div class="approval-space" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="wedgie-stripes" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="approval-heading"><p class="eyebrow">A LITTLE HUMAN INPUT</p><h2 id="approval-title">Press the green button.</h2><p id="approval-description">On your physical Wedgie. Red says no.</p></div>
+    <div class="device-scene" aria-hidden="true">
+      <div id="wedgie-3d"></div>
+      <div class="device-orbit"></div>
+      <div class="wedgie-model">
+        <div class="device-joystick"><i></i></div>
+        <div class="device-display"><div class="screen-stripes"><i></i><i></i><i></i></div><strong id="device-question">Launch mission?</strong><b id="device-target">SOL</b><span id="device-cost">Fuel: 0</span><div class="screen-yes">sign</div><div class="screen-no">decline</div></div>
+        <div class="hardware-keys"><i class="hardware-key key-green"></i><i class="hardware-key key-grey"></i><i class="hardware-key key-grey"></i><i class="hardware-key key-red"></i></div>
+        <span class="case-logo">wedgie</span>
+        <svg class="press-pointer" viewBox="0 0 60 70"><path d="M24 31V9C24 1 36 1 36 9V28C37 22 46 22 46 30C48 25 56 28 55 35L49 59Q48 63 44 63H29Q26 63 24 60L9 41C4 35 11 28 17 33L24 39Z" fill="#fffaf0" stroke="#1a1b1a" stroke-width="3" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+    <div id="approval-action" class="approval-action">Launch your expedition</div>
+    <div id="physical-instructions" class="physical-instructions"><div class="confirm-instruction"><span class="instruction-key"></span><div><strong>GREEN = CONFIRM</strong><span>Press it on your Wedgie.</span></div></div><div class="decline-instruction"><span class="instruction-key"></span><div><strong>RED = CANCEL</strong><span>No signature. No action.</span></div></div></div>
+    <div class="approval-state"><span id="approval-status" role="status" aria-live="polite">WAITING FOR YOUR BUTTON PRESS</span><span id="approval-countdown"></span></div>
+    <p class="illustration-note">The animation is a guide. Review the real device screen.</p>
+    <a id="approval-source" class="source-link" href="https://github.com/NikolaiL/wedgie-starproof/tree/main/device" target="_blank" rel="noreferrer">Review device source on GitHub ↗</a>
+    <button id="cancel" class="button full subtle">Cancel request in browser</button>
+  </dialog>
 </body>
 </html>

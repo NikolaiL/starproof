@@ -4,9 +4,12 @@ __pycache__/
 .DS_Store
 *.log
 screenshots/
-.env
-.env.*
+.env*
 !.env.example
 *.key
 *.tgz
 *-receipts.json
+.vercel/
+public/vendor/
+public/sdk.js
+public/device-install.json

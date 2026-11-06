@@ -4,67 +4,74 @@ A browser space-exploration reference game for [wedgie-actions](https://github.c
 
 ## Run
 
-Requires Node.js 24+ and desktop Chrome or Edge for Web Serial. The only runtime dependency is the separately maintained `wedgie-actions` toolkit, installed from a GitHub HTTPS archive pinned to a Git commit. No GitHub login or SSH key is needed.
+Requires Node.js 24+ and desktop Chrome or Edge for Web Serial. The signing toolkit and installable device app are pinned to GitHub commits. The browser build bundles Three.js and Wedgie’s real 3D model; esbuild is a development dependency. No GitHub login or SSH key is needed to install dependencies.
 
 ```sh
 npm ci
 npm start
 # http://localhost:4173
 npm test
+npm run build  # browser bundles and pinned device installer
 ```
 
 Tests also require OpenSSL and Python 3. They create an ephemeral test CA, exercise real P-256 signatures, and verify that the production verifier rejects that software-generated identity. Test trust roots never enter the running app.
 
 ## Install the Wedgie app
 
-Download the official CLI from <https://wedgie.dev/wedgie.py>. With `pyserial` installed on the computer, run it from **this folder**, which contains `wedgie.json`:
+**Connect Wedgie** checks the installed app. If it is missing or outdated, the browser shows the exact GitHub revision and asks the device to install it. Press the physical green button on Wedgie’s **FULL CONTROL** prompt; red declines. After writing and checking the four app files, it restarts and connects to Starproof. Desktop Chrome/Edge and firmware 0.3.76+ are required.
 
-```sh
-python3 /path/to/wedgie.py install .
-# Or: uv run --with pyserial python3 /path/to/wedgie.py install .
-```
+The installable app has its own repository: [NikolaiL/wedgie-starproof](https://github.com/NikolaiL/wedgie-starproof). To install through [wedgie.dev/connect](https://wedgie.dev/connect), open **Apps from a GitHub repo**, add **`NikolaiL/wedgie-starproof`**, and install Starproof. Close that USB connection before returning to the game. CLI users can clone the device repository and run the official `wedgie.py install .` there.
 
-The common MicroPython helper is vendored as `device/starproof_actions.py` so the app is self-contained on the Wedgie. Run `npm run sync:device` after deliberately upgrading the toolkit; `npm test` checks for drift.
-
-Close other tabs/tools holding the serial port first. Installation asks for the real green button on the device's FULL CONTROL prompt. It switches the one app slot from the current app to Starproof. This app creates no keys, locks no objects, and never writes Safe Signer's key slots. The factory key and its existing certificate are read/used as provisioned. Restart closes installer access.
-
-If the browser says “unknown type,” Starproof is not running on the device yet. Install it, reload the browser page, and reconnect. To return to Safe Signer later, use the official CLI's `use safe` command; its chip key is retained.
+The game pins this device repo as `starproof-device` and builds a same-origin bundle containing the exact source files and SHA-256 checksums. Device source is maintained only in that repo. Installation selects Starproof as the running app; the app creates no keys, locks no objects, and never writes Safe Signer’s key slots. Existing factory identity is used as provisioned. Device restart closes installer access.
 
 ## Play
 
 1. Connect Wedgie. The server validates its certificate; this alone is not proof of key possession.
-2. **Authorize expedition** and press green on Wedgie. A valid factory-key signature starts the mission.
-3. Fly with WASD/arrows. Space scans a signal; select a system on the chart or destination buttons.
-4. **Commit jump** spends one of eight fuel units and requires a signature.
-5. **Claim artifact** collects the current system's artifact and requires a signature. Each system has one.
-6. Export signed receipts to inspect the certificate, complete signed text, and `(r,s)` signature.
+2. **Let’s launch** and press green on Wedgie. A valid factory-key signature starts the mission.
+3. Fly with WASD/arrows. Space or **Send a sonar ping** scans the nearest system; select destinations on the chart or its buttons. Kepler’s Jelly Sentinel and Vega’s Moon Muncher react to your ping.
+4. **Jump here** consumes the entire one-jump tank and requires a signature. Refill before every further jump.
+5. **Refuel** collects one free fuel cache per planet. After that, a refill costs **3 in-game credits**, shown on both screens and bound into the signature. Start with 6 credits; each artifact pays 4. These credits have no real-world value.
+6. **Bag the artifact** collects the current planet’s unique loot. Kepler also contains the **Nebula Reach** map (Vega and Lyra); Lyra contains the **Wild Frontier** map (Cinder and Moss). Select recovered maps above the chart. Locked regions cannot be reached, including through direct API requests.
+7. Export signed receipts to inspect the certificate, complete signed text, and `(r,s)` signature.
 
-The red button declines. Browser cancellation invalidates the challenge; decline on Wedgie to clear its pending screen. There is no signing bypass for the virtual Wedgie or a software key. An emulator may preview the app UI but cannot pass the production certificate check.
+The dark confirmation window has stars and passing comets. Its animated hardware guide points to the physical green button (**confirm**) and labels the red button (**cancel**). **How do the buttons work?** previews this guide without sending a signing request. Decorative motion stops when the browser’s reduced-motion preference is enabled.
 
-Games currently live in the server's memory, expire after two hours of inactivity, and disappear on server restart. Browser cookies identify the local session; returning to the same cookie resumes it and strategic actions still require the original chip.
+The red button declines. **Cancel request in browser** invalidates the server challenge and sends an ID-scoped cancel command to dismiss the Wedgie prompt without signing. Reinstall the updated device app for this feature; older copies block USB inside the prompt. A response already signed cannot be recalled, so the browser discards it after cancellation. There is no signing bypass for the virtual Wedgie or a software key. An emulator may preview the app UI but cannot pass the production certificate check.
+
+Local games use process memory and disappear on restart. The Vercel deployment uses private Upstash Redis state with a two-hour idle expiry and atomic compare-and-set updates, so independent function instances cannot consume a challenge twice. Browser cookies identify the local session; returning to the same cookie resumes it and strategic actions still require the original chip.
 
 ## Toolkit layout
 
 | File | Responsibility |
 | --- | --- |
 | `wedgie-actions/browser` | Shared Web Serial SDK, served by this app at `/sdk.js` |
+| `public/graphics.js` | Procedural planet, monster and ship artwork; no downloaded assets |
+| `public/approval.js` | Animated hardware guide and confirmation status |
 | `public/protocol.js` | Star systems; the server uses `wedgie-actions/protocol` for encoding |
-| `device/starproof_protocol.py` | Strict MicroPython parsing of the exact signed action |
-| `device/starproof.py` | Physical confirmation and factory-key signing |
+| `starproof-device/device/starproof_protocol.py` | Strict MicroPython parsing of the exact signed action |
+| `starproof-device/device/starproof.py` | Physical confirmation and factory-key signing |
 | `wedgie-actions/server` | Shared certificate-chain and P-256 verification |
-| `device/starproof_actions.py` | Vendored toolkit helper; sync script checks its provenance |
+| `starproof-device/device/starproof_actions.py` | Toolkit helper maintained in the device repo |
+| `vendor/` | MIT Wedgie 3D/USB code and Starproof installer integration; see its README |
+| `lib/sessions.js` | Local memory or shared Redis with atomic state updates |
 | `lib/game.js` | Single-use challenges and authoritative strategic state |
 | `server.js` | Local HTTP API, sessions, limits and static files |
 | `test/security.test.js` | Forgery, tampering, replay, expiry, cancellation and protocol checks |
 
 ## Trust boundary
 
-The server reconstructs the signed payload, binding the protocol, origin, mission, certificate fingerprint, action, source, destination, fuel cost, sequence, expiry and random nonce. The device hashes those exact bytes; a copied certificate alone is insufficient. The server validates the certificate again at commit and accepts the challenge once.
+The server reconstructs the signed payload, binding the protocol, origin, mission, certificate fingerprint, action, source, destination, action cost (fuel for a jump; credits for a refill), sequence, expiry and random nonce. The device hashes those exact bytes; a copied certificate alone is insufficient. The server validates the certificate again at commit and accepts the challenge once.
 
-This proves **participation by a certified chip**, not approved firmware, human presence, one person per chip, or bot resistance. A modified app on a genuine chip can sign automatically. The localhost server is the authority for this demo; changing its code can bypass its rules. There is no smart-contract enforcement or sponsor integration yet. See [THREAT_MODEL.md](THREAT_MODEL.md) and [SPONSORS.md](SPONSORS.md).
+This proves **participation by a certified chip**, not approved firmware, human presence, one person per chip, or bot resistance. A modified app on a genuine chip can sign automatically. The deployed server is the authority for this demo; changing its code can bypass its rules. There is no smart-contract enforcement or sponsor integration yet. See [THREAT_MODEL.md](THREAT_MODEL.md) and [SPONSORS.md](SPONSORS.md).
+
+## Vercel deployment
+
+Production: <https://starproof-wedgie.vercel.app>. Deploy with `vercel --prod`. Set `APP_ORIGIN=https://starproof-wedgie.vercel.app` and provision `KV_REST_API_URL` / `KV_REST_API_TOKEN` using the free Upstash Redis integration. Vercel refuses to start without shared storage. Never expose those credentials in browser code or Git. The device accepts this exact HTTPS origin and numeric localhost ports; changing the production domain requires a coordinated device release.
+
+`npm run build` prepares all static assets; `/api/*` uses one Node function. Server cookies are HTTP-only, same-site strict and secure in production. Storage errors fail closed. Credits are game counters, not money. This remains an unaudited prototype without multiplayer or persistent accounts.
 
 ## Provenance and Classic disclosure
 
-Created as a new ETHGlobal Mumbai Classic project on November 6, 2026. Code and UI were authored with Codex assistance and tested with Node's built-in test runner, Python and the browser. The user performed physical device installation/interaction. Reused platform components: Wedgie firmware, `lcd`, `ui`, `optiga`, its serial transport, and public Infineon certificate material. The app-loop and factory-signing API usage follow Wedgie's public guides; this is not a fork of Safe Signer or Plain Wallet. Certificate sources and fingerprints are maintained in the [toolkit CA bundle](https://github.com/NikolaiL/wedgie-actions/tree/main/certs). The original combined implementation remains in this repo's Git history; the current game imports the extracted toolkit rather than maintaining a second verifier.
+Created as a new ETHGlobal Mumbai Classic project on November 6, 2026. Code and UI were authored with Codex assistance and tested with Node's built-in test runner, Python and the browser. The user performed physical device installation/interaction. Reused web components: Wedgie’s MIT 3D geometry/renderer and USB REPL/file installer helpers, pinned and attributed in [vendor/README.md](vendor/README.md), plus Three.js. Reused platform components: Wedgie firmware, `lcd`, `ui`, `optiga`, its serial transport, and public Infineon certificate material. The app-loop and factory-signing API usage follow Wedgie's public guides; this is not a fork of Safe Signer or Plain Wallet. Certificate sources and fingerprints are maintained in the [toolkit CA bundle](https://github.com/NikolaiL/wedgie-actions/tree/main/certs). The original combined implementation remains in this repo's Git history; the current game imports the extracted toolkit rather than maintaining a second verifier.
 
 Guides: [Wedgie skill](https://wedgie.dev/skill.md), [apps](https://wedgie.dev/code.md), [Trust M](https://wedgie.dev/trustm.md), [USB](https://wedgie.dev/usb.md), [security](https://wedgie.dev/security.md).

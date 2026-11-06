@@ -5,13 +5,14 @@
   "type": "module",
   "description": "Space exploration demo for certified Trust M actions via wedgie-actions.",
   "engines": {
-    "node": ">=24"
+    "node": "24.x"
   },
   "scripts": {
     "start": "node server.js",
     "test": "node --test test/*.test.js",
-    "sync:device": "node tools/sync-device.js",
-    "pretest": "node tools/sync-device.js --check"
+    "pretest": "npm run build",
+    "build": "node tools/build.js",
+    "prestart": "npm run build"
   },
   "license": "MIT",
   "repository": {
@@ -20,6 +21,11 @@
   },
   "homepage": "https://github.com/NikolaiL/starproof#readme",
   "dependencies": {
-    "wedgie-actions": "https://codeload.github.com/NikolaiL/wedgie-actions/tar.gz/35efb78ef216e1f9afad168687966e1f28269ffd"
+    "three": "^0.187.0",
+    "wedgie-actions": "https://codeload.github.com/NikolaiL/wedgie-actions/tar.gz/bc1613123ac7baff4daf8f2f78bac4b86d1da022"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "starproof-device": "https://codeload.github.com/NikolaiL/wedgie-starproof/tar.gz/74b716298c826ef03dac71777d0bb2aeb1ccbdac"
   }
 }

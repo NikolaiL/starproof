@@ -1,0 +1,7 @@
+# Wedgie 3D preview
+
+`wedgie3d.ts`, `dir8` in `device.ts`, and `public/3d/wedgie.{json,bin}` come from [wedgie-dev](https://github.com/clawdbotatg/wedgie-dev/tree/926972f8efec0859f6cab5d61ce51e1752ec549d), commit `926972f8efec0859f6cab5d61ce51e1752ec549d`. The geometry is the real clawd-pico-case v1.7, exported by that project's `tools/case3d.py`.
+
+Copyright (c) 2026 Austin Griffith; MIT, see `WEDGIE-LICENSE.txt`. The only renderer adaptation disables decorative movement under reduced motion. Starproof mounts it with `interactive: false`; the browser cannot approve a physical request. `npm run build` bundles it and Three.js locally; no CDN scripts are loaded. Three.js is MIT-licensed under its package's LICENSE.
+
+`repl.ts`, `files.ts`, and `FREE_PY` in `free-app.ts` are reused from the same pinned Wedgie commit under the same license. `starproof-installer.ts` is Starproof's restricted integration: it writes only the four pinned app modules and selects Starproof after a physical full-control approval. The compiled files include the upstream license.

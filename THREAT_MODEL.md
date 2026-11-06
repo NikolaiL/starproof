@@ -10,20 +10,24 @@ The verifier trusts its deployed code, the game's authoritative state, its clock
 - A software key or self-signed certificate claiming to be Trust M.
 - A signature over a different destination, cost, action, origin or mission.
 - Reusing an already committed action, an expired challenge, or a browser-cancelled request.
-- Spending fuel or claiming an artifact without going through the verified strategic state transition.
+- Spending fuel/credits, refuelling, unlocking maps or claiming an artifact without going through the verified strategic state transition.
 - Replacing the chip midway through the expedition.
 
 `npm test` here and in wedgie-actions covers these properties with a separate ephemeral PKI. The production verifier never loads that test PKI.
+
+Remote cancellation is a denial only: it polls while the physical approval dialog is open, validates the active request ID, and never injects a green press. The browser independently invalidates the server challenge. Cancellation cannot retract a signature already generated.
+
+The first-run installer writes only the pinned Starproof app files and `apps.json`, after full-control approval. It verifies bundle checksums before access and file checksums on device. An interrupted update may need reinstalling through wedgie.dev. Community app installation is not manufacturer-reviewed firmware attestation.
 
 ## Limits
 
 1. **Hostile firmware / automation:** a genuine chip is still genuine when driven by a modified program. This device has no remote measured-firmware attestation or cryptographic proof of a physical button press. The stock app's physical-only `ui.ask` protects cooperative users; the remote verifier cannot establish that this app was running.
 2. **Relaying / device farms:** an attacker can forward challenges to a real chip elsewhere. This is proof of chip participation, not proximity, one human, one account, or fair play. Sessions are not globally limited to one per chip.
-3. **Local authority:** this demo runs on localhost. Anyone controlling the server can change its verifier or state. Shared gameplay needs an independently controlled service, or contract-enforced state transitions with authenticated key enrollment. A contract that only checks P-256 and accepts arbitrary keys does not prove Trust M origin.
+3. **Local authority:** this demo runs on localhost or its pinned Vercel origin. Anyone controlling the server can change its verifier or state. Shared gameplay needs an independently controlled service, or contract-enforced state transitions with authenticated key enrollment. A contract that only checks P-256 and accepts arbitrary keys does not prove Trust M origin.
 4. **Physical possession:** someone holding the Wedgie may use its factory key. There is no PIN, chip revocation or recovery flow in this prototype.
 5. **CA/revocation:** certificate dates and the pinned two-level chain are checked. CRLs/OCSP, production enrollment policy, CA rotations and compromised-device revocations are not implemented. See the certificate provenance in the [toolkit CA provenance](https://github.com/NikolaiL/wedgie-actions/tree/main/certs).
 6. **Privacy:** the factory certificate is a stable identifier. A verifier can link its uses. Exported receipts include that certificate and should not be treated as anonymous.
-7. **Prototype state:** sessions are memory-only, browser flight/scan state is cosmetic, no multiplayer, economic rewards, persistence, public deployment or security audit is included.
+7. **Prototype state:** local sessions are memory-only; deployed sessions use private Redis with two-hour idle expiry and atomic challenge consumption. Browser flight/scan state is cosmetic. No multiplayer, real economic rewards, account recovery or security audit is included.
 
 ## Possible contract extension (not implemented)
 

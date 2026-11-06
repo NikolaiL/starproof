@@ -1,0 +1,20 @@
+import { build } from 'esbuild';
+import { mkdir, copyFile, readFile, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import { DEVICE_VERSION } from '../public/protocol.js';
+const license = '/*!\n' + await readFile(new URL('../vendor/WEDGIE-LICENSE.txt', import.meta.url), 'utf8') + '\n*/';
+await mkdir(new URL('../public/vendor/', import.meta.url), { recursive: true });
+await build({ entryPoints: ['vendor/wedgie3d.ts'], bundle: true, format: 'esm', minify: true, target: 'es2022', outfile: 'public/vendor/wedgie3d.js', legalComments: 'eof', banner: { js: license } });
+await build({ entryPoints: ['vendor/starproof-installer.ts'], bundle: true, format: 'esm', minify: true, target: 'es2022', outfile: 'public/vendor/installer.js', legalComments: 'eof', banner: { js: license } });
+await copyFile(new URL(import.meta.resolve('wedgie-actions/browser')), new URL('../public/sdk.js', import.meta.url));
+const root = new URL('.', import.meta.resolve('starproof-device/package.json'));
+const metadata = JSON.parse(await readFile(new URL('package.json', root)));
+if (metadata.version !== DEVICE_VERSION) throw new Error('Update DEVICE_VERSION to match the pinned device app.');
+const manifest = JSON.parse(await readFile(new URL('wedgie.json', root)));
+const project = JSON.parse(await readFile(new URL('../package.json', import.meta.url)));
+const commit = project.devDependencies['starproof-device'].split('/').at(-1);
+const files = await Promise.all(manifest.apps[0].files.map(async (path) => {
+  const bytes = await readFile(new URL(path, root));
+  return { name: path.split('/').at(-1), data: bytes.toString('base64'), sha256: createHash('sha256').update(bytes).digest('hex') };
+}));
+await writeFile(new URL('../public/device-install.json', import.meta.url), JSON.stringify({ version: metadata.version, commit, source: `https://github.com/NikolaiL/wedgie-starproof/tree/${commit}/device`, app: manifest.apps[0], files }));
