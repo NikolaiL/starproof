@@ -107,7 +107,7 @@ test('MicroPython parser accepts the exact browser format and rejects hidden/uns
   const game = new Game(verifier);
   const text = game.challenge('launch', 'sol', certificate, origin).text;
   const python = `import sys,json\nsys.path.insert(0,'device')\nfrom starproof_protocol import parse_action,certificate_der\nv=json.load(sys.stdin)\nassert parse_action(v['text'])['action']=='launch'\nassert certificate_der(bytes.fromhex(v['wrapped'])).hex()==v['cert']\nfor bad in v['bad']:\n try: parse_action(bad)\n except ValueError: pass\n else: raise AssertionError('accepted invalid action')\nprint('device protocol OK')`;
-  const bad = [text + '\n', text.replace('action=launch', 'action=withdraw'), text.replace('cost=0', 'cost=99'), text.replace('sequence=0', 'sequence=01'), text.replace('target=sol', 'target=vega'), text.replace('origin=http://localhost:4173', 'origin=https://evil.example'), text.replace('from=sol', 'from=sol\naction=claim'), text.replace('starproof/v1', 'other/v1'), text + '\u0000'];
+  const bad = [text + '\n', text.replace('action=launch', 'action=withdraw'), text.replace('cost=0', 'cost=99'), text.replace('sequence=0', 'sequence=01'), text.replace('target=sol', 'target=vega'), text.replace('origin=http://localhost:4173', 'origin=https://evil.example'), text.replace('origin=http://localhost:4173', 'origin=http://localhost:evil.example:443'),text.replace('from=sol', 'from=sol\naction=claim'), text.replace('starproof/v1', 'other/v1'), text + '\u0000'];
   const result = execFileSync('python3', ['-c', python], { cwd: new URL('..', import.meta.url), input: JSON.stringify({ text, cert: certificate, wrapped: 'c00000' + certificate, bad }), encoding: 'utf8' });
   assert.match(result, /device protocol OK/);
 });

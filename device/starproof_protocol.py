@@ -12,10 +12,10 @@ def _hex(value, length):
 
 def parse_action(text):
     fields = decode_fields(text, "starproof", FIELDS)
-    origin = fields["origin"]
-    if not (origin.startswith("http://localhost:") or origin.startswith("http://127.0.0.1:")):
+    parts = fields["origin"].split(":")
+    if len(parts) != 3 or parts[0] + ":" + parts[1] not in ("http://localhost", "http://127.0.0.1"):
         raise ValueError("use the local Starproof demo")
-    port = origin.rsplit(":", 1)[1]
+    port = parts[2]
     if not port.isdigit() or not 1 <= int(port) <= 65535:
         raise ValueError("bad origin")
     for name, length in (("session", 32), ("challenge", 32), ("chip", 64), ("nonce", 64)):
