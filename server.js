@@ -3,11 +3,11 @@ import { readFile } from 'node:fs/promises';
 import { randomBytes } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { Game } from './lib/game.js';
-import { trustM } from './lib/verifier.js';
+import { trustM } from 'wedgie-actions/server';
 
 const PUBLIC = new URL('./public/', import.meta.url);
 const FILES = { '/': ['index.html', 'text/html'], '/style.css': ['style.css', 'text/css'],
-  '/app.js': ['app.js', 'text/javascript'], '/sdk.js': ['sdk.js', 'text/javascript'], '/protocol.js': ['protocol.js', 'text/javascript'] };
+  '/app.js': ['app.js', 'text/javascript'], '/sdk.js': [new URL(import.meta.resolve('wedgie-actions/browser')), 'text/javascript'], '/protocol.js': ['protocol.js', 'text/javascript'] };
 
 export function createApp() {
   const sessions = new Map();

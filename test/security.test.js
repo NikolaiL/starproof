@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { X509Certificate, sign, generateKeyPairSync } from 'node:crypto';
-import { createTrustVerifier, trustM, certificateFromHex } from '../lib/verifier.js';
+import { createTrustVerifier, trustM, certificateFromHex } from 'wedgie-actions/server';
 import { Game } from '../lib/game.js';
 import { createApp } from '../server.js';
 
@@ -121,6 +121,11 @@ test('HTTP serves the game, isolates sessions and refuses cross-origin, oversize
   assert.equal(page.status, 200);
   assert.match(await page.text(), /A mission/);
   assert.match(page.headers.get('content-security-policy'), /frame-ancestors 'none'/);
+  const sdk = await fetch(base + '/sdk.js');
+  assert.equal(sdk.status, 200);
+  const sdkText = await sdk.text();
+  assert.match(sdkText, /constructor\(app\)/);
+  assert.doesNotMatch(sdkText, /starproof_hello/);
   const response = await fetch(base + '/api/state');
   const cookie = response.headers.get('set-cookie').split(';')[0];
   assert.equal((await response.json()).started, false);

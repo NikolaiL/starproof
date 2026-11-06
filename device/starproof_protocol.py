@@ -1,4 +1,5 @@
 """Strict, shared-format action parsing; no hardware imports so it can be tested on a host."""
+from starproof_actions import decode_fields, certificate_der
 
 FIELDS = ("origin", "session", "challenge", "chip", "action", "from", "target", "cost", "sequence", "expires", "nonce")
 WORLDS = {"sol": "Sol", "kepler": "Kepler", "vega": "Vega", "lyra": "Lyra"}
@@ -10,16 +11,7 @@ def _hex(value, length):
 
 
 def parse_action(text):
-    if not isinstance(text, str) or len(text) > 1024 or any(ord(c) > 126 or (ord(c) < 32 and c != "\n") for c in text):
-        raise ValueError("not a Starproof action")
-    lines = text.split("\n")
-    if len(lines) != len(FIELDS) + 1 or lines[0] != "starproof/v1":
-        raise ValueError("wrong action format")
-    fields = {}
-    for name, line in zip(FIELDS, lines[1:]):
-        if not line.startswith(name + "="):
-            raise ValueError("wrong action fields")
-        fields[name] = line[len(name) + 1:]
+    fields = decode_fields(text, "starproof", FIELDS)
     origin = fields["origin"]
     if not (origin.startswith("http://localhost:") or origin.startswith("http://127.0.0.1:")):
         raise ValueError("use the local Starproof demo")
@@ -47,20 +39,3 @@ def parse_action(text):
     if action == "claim" and source != target:
         raise ValueError("claim in the current system")
     return fields
-
-
-def certificate_der(blob):
-    for offset in range(min(17, len(blob) - 4)):
-        if blob[offset] != 0x30:
-            continue
-        first = blob[offset + 1]
-        count = (first & 127) if first & 128 else 0
-        if count > 3:
-            continue
-        length = first if not count else 0
-        for i in range(count):
-            length = length * 256 + blob[offset + 2 + i]
-        end = offset + 2 + count + length
-        if length >= 200 and end <= len(blob):
-            return blob[offset:end]
-    raise ValueError("cannot read chip certificate")

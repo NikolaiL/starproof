@@ -2,7 +2,7 @@ import { WedgieSigner } from './sdk.js';
 import { SECTORS, sector } from './protocol.js';
 
 const $ = (id) => document.getElementById(id);
-const signer = new WedgieSigner();
+const signer = new WedgieSigner('starproof');
 let state = { started: false, location: 'sol', fuel: 8, claims: [], receipts: [], sequence: 0 };
 let selected = 'kepler', busy = false, deviceReady = false, cancelled = false;
 let ship = { x: 0.23, y: 0.54 }, scanned = new Set(), noticeTimer;

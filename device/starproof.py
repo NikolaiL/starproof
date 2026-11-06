@@ -9,6 +9,7 @@ import lcd
 import ui
 import wedgie
 from starproof_protocol import parse_action, certificate_der, WORLDS, ARTIFACTS
+from starproof_actions import confirm_action
 
 d = None
 keys = None
@@ -47,14 +48,12 @@ def handle(message):
         detail = (ARTIFACTS[action["target"]] if kind == "claim" else
                   WORLDS[action["from"]] + " -> " + WORLDS[action["target"]] if kind == "jump" else "Depart from Sol")
         lines = [detail, "Fuel: " + action["cost"], action["origin"].split("//", 1)[1], "Mission " + action["session"][:8]]
-        if not ui.ask(d, titles[kind], lines, yes="sign", no="decline", ms=60000, keys=keys):
+        proof = confirm_action(chip, d, text, titles[kind], lines)
+        if proof is None:
             wedgie.send({"id": mid, "type": "refused"})
             home("Action declined")
             return
-        ui.progress("Signing action", "in the Trust M", bar=False)
-        import optiga
-        r, s = chip.sign(optiga.FACTORY_KEY, hashlib.sha256(text.encode()).digest())
-        wedgie.send({"id": mid, "type": "starproof_signature", "r": "%064x" % r, "s": "%064x" % s})
+        wedgie.send({"id": mid, "type": "starproof_signature", "r": proof["r"], "s": proof["s"]})
         home("Action signed")
     elif kind == "hello":
         wedgie.send(wedgie.hello(mid, running="starproof", app="starproof-1"))

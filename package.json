@@ -3,8 +3,23 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "A space exploration demo and Trust M action-signing toolkit.",
-  "engines": { "node": ">=24" },
-  "scripts": { "start": "node server.js", "test": "node --test test/*.test.js" },
-  "license": "MIT"
+  "description": "Space exploration demo for certified Trust M actions via wedgie-actions.",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test test/*.test.js",
+    "sync:device": "node tools/sync-device.js",
+    "pretest": "node tools/sync-device.js --check"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NikolaiL/starproof.git"
+  },
+  "homepage": "https://github.com/NikolaiL/starproof#readme",
+  "dependencies": {
+    "wedgie-actions": "https://codeload.github.com/NikolaiL/wedgie-actions/tar.gz/573a91ea382af5d484ccd9f62bda527daab2b82e"
+  }
 }

@@ -7,9 +7,3 @@ export const SECTORS = [
 export const sector = (id) => SECTORS.find((item) => item.id === id);
 export const PROTOCOL = 'starproof/v1';
 export const CHALLENGE_MS = 90_000;
-
-// Fixed order and ASCII values give the browser, server and MicroPython one signed representation.
-export function actionText(fields) {
-  return [PROTOCOL, ...['origin', 'session', 'challenge', 'chip', 'action', 'from', 'target', 'cost', 'sequence', 'expires', 'nonce']
-    .map((name) => `${name}=${fields[name]}`)].join('\n');
-}

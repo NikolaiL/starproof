@@ -3,7 +3,7 @@
     "mod": "starproof",
     "name": "Starproof",
     "about": "Sign an expedition launch, a star jump or an artifact claim with your Trust M.",
-    "files": ["device/starproof.py", "device/starproof_protocol.py"],
+    "files": ["device/starproof.py", "device/starproof_protocol.py", "device/starproof_actions.py"],
     "entry": "run",
     "fw": "0.3.76",
     "chip": "OPTIGA Trust M",

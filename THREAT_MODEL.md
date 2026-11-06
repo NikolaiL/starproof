@@ -21,7 +21,7 @@ The verifier trusts its deployed code, the game's authoritative state, its clock
 2. **Relaying / device farms:** an attacker can forward challenges to a real chip elsewhere. This is proof of chip participation, not proximity, one human, one account, or fair play. Sessions are not globally limited to one per chip.
 3. **Local authority:** this demo runs on localhost. Anyone controlling the server can change its verifier or state. Shared gameplay needs an independently controlled service, or contract-enforced state transitions with authenticated key enrollment. A contract that only checks P-256 and accepts arbitrary keys does not prove Trust M origin.
 4. **Physical possession:** someone holding the Wedgie may use its factory key. There is no PIN, chip revocation or recovery flow in this prototype.
-5. **CA/revocation:** certificate dates and the pinned two-level chain are checked. CRLs/OCSP, production enrollment policy, CA rotations and compromised-device revocations are not implemented. See the certificate provenance in `certs/README.md`.
+5. **CA/revocation:** certificate dates and the pinned two-level chain are checked. CRLs/OCSP, production enrollment policy, CA rotations and compromised-device revocations are not implemented. See the certificate provenance in the [toolkit CA provenance](https://github.com/NikolaiL/wedgie-actions/tree/main/certs).
 6. **Privacy:** the factory certificate is a stable identifier. A verifier can link its uses. Exported receipts include that certificate and should not be treated as anonymous.
 7. **Prototype state:** sessions are memory-only, browser flight/scan state is cosmetic, no multiplayer, economic rewards, persistence, public deployment or security audit is included.
 

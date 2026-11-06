@@ -1,12 +1,13 @@
 # Starproof
 
-A browser space-exploration demo and reusable action-signing toolkit for Wedgie with an **OPTIGA Trust M** chip. A manufacturer-certified factory key signs the launch of an expedition and its strategic decisions. Flying, scanning and inspecting destinations need no signature.
+A browser space-exploration reference game for [wedgie-actions](https://github.com/NikolaiL/wedgie-actions), using a Wedgie with an **OPTIGA Trust M** chip. A manufacturer-certified factory key signs the launch of an expedition and its strategic decisions. Flying, scanning and inspecting destinations need no signature.
 
 ## Run
 
-Requires Node.js 24+ and desktop Chrome or Edge for Web Serial. There are no npm runtime dependencies.
+Requires Node.js 24+ and desktop Chrome or Edge for Web Serial. The only runtime dependency is the separately maintained `wedgie-actions` toolkit, installed from a GitHub HTTPS archive pinned to a Git commit. No GitHub login or SSH key is needed.
 
 ```sh
+npm ci
 npm start
 # http://localhost:4173
 npm test
@@ -22,6 +23,8 @@ Download the official CLI from <https://wedgie.dev/wedgie.py>. With `pyserial` i
 python3 /path/to/wedgie.py install .
 # Or: uv run --with pyserial python3 /path/to/wedgie.py install .
 ```
+
+The common MicroPython helper is vendored as `device/starproof_actions.py` so the app is self-contained on the Wedgie. Run `npm run sync:device` after deliberately upgrading the toolkit; `npm test` checks for drift.
 
 Close other tabs/tools holding the serial port first. Installation asks for the real green button on the device's FULL CONTROL prompt. It switches the one app slot from the current app to Starproof. This app creates no keys, locks no objects, and never writes Safe Signer's key slots. The factory key and its existing certificate are read/used as provisioned. Restart closes installer access.
 
@@ -44,11 +47,12 @@ Games currently live in the server's memory, expire after two hours of inactivit
 
 | File | Responsibility |
 | --- | --- |
-| `public/sdk.js` | Web Serial connection, JSON-line requests, `signAction(challenge)` |
-| `public/protocol.js` | Versioned action encoding and the demo's star systems |
+| `wedgie-actions/browser` | Shared Web Serial SDK, served by this app at `/sdk.js` |
+| `public/protocol.js` | Star systems; the server uses `wedgie-actions/protocol` for encoding |
 | `device/starproof_protocol.py` | Strict MicroPython parsing of the exact signed action |
 | `device/starproof.py` | Physical confirmation and factory-key signing |
-| `lib/verifier.js` | Certificate-chain and P-256 signature verification |
+| `wedgie-actions/server` | Shared certificate-chain and P-256 verification |
+| `device/starproof_actions.py` | Vendored toolkit helper; sync script checks its provenance |
 | `lib/game.js` | Single-use challenges and authoritative strategic state |
 | `server.js` | Local HTTP API, sessions, limits and static files |
 | `test/security.test.js` | Forgery, tampering, replay, expiry, cancellation and protocol checks |
@@ -61,6 +65,6 @@ This proves **participation by a certified chip**, not approved firmware, human 
 
 ## Provenance and Classic disclosure
 
-Created as a new ETHGlobal Mumbai Classic project on November 6, 2026. Code and UI were authored with Codex assistance and tested with Node's built-in test runner, Python and the browser. The user performed physical device installation/interaction. Reused platform components: Wedgie firmware, `lcd`, `ui`, `optiga`, its serial transport, and public Infineon certificate material. The app-loop and factory-signing API usage follow Wedgie's public guides; this is not a fork of Safe Signer or Plain Wallet. Certificate sources and fingerprints are in [certs/README.md](certs/README.md).
+Created as a new ETHGlobal Mumbai Classic project on November 6, 2026. Code and UI were authored with Codex assistance and tested with Node's built-in test runner, Python and the browser. The user performed physical device installation/interaction. Reused platform components: Wedgie firmware, `lcd`, `ui`, `optiga`, its serial transport, and public Infineon certificate material. The app-loop and factory-signing API usage follow Wedgie's public guides; this is not a fork of Safe Signer or Plain Wallet. Certificate sources and fingerprints are maintained in the [toolkit CA bundle](https://github.com/NikolaiL/wedgie-actions/tree/main/certs). The original combined implementation remains in this repo's Git history; the current game imports the extracted toolkit rather than maintaining a second verifier.
 
 Guides: [Wedgie skill](https://wedgie.dev/skill.md), [apps](https://wedgie.dev/code.md), [Trust M](https://wedgie.dev/trustm.md), [USB](https://wedgie.dev/usb.md), [security](https://wedgie.dev/security.md).
