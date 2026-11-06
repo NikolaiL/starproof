@@ -13,7 +13,7 @@ The verifier trusts its deployed code, the game's authoritative state, its clock
 - Spending fuel or claiming an artifact without going through the verified strategic state transition.
 - Replacing the chip midway through the expedition.
 
-`npm test` covers these properties with a separate ephemeral PKI. The production verifier never loads that test PKI.
+`npm test` here and in wedgie-actions covers these properties with a separate ephemeral PKI. The production verifier never loads that test PKI.
 
 ## Limits
 
