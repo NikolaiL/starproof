@@ -1,7 +1,8 @@
 import { WedgieSigner } from './sdk.js';
-import { SECTORS, sector } from './protocol.js';
+import { SECTORS, sector, PROTOCOL } from './protocol.js';
 
 const $ = (id) => document.getElementById(id);
+const emptyLog = $('receipts').firstElementChild;
 const signer = new WedgieSigner('starproof');
 let state = { started: false, location: 'sol', fuel: 8, claims: [], receipts: [], sequence: 0 };
 let selected = 'kepler', busy = false, deviceReady = false, cancelled = false;
@@ -18,6 +19,7 @@ async function api(path, body) {
 }
 function notice(text) { clearTimeout(noticeTimer); $('notice').textContent = text; $('notice').hidden = false; noticeTimer = setTimeout(() => $('notice').hidden = true, 9000); }
 function select(id) { selected = id; render(); }
+function dock() { const here = sector(state.location); ship = { x: here.x, y: here.y }; }
 
 for (const star of SECTORS) {
   const button = document.createElement('button'); button.type = 'button'; button.className = 'destination-button';
@@ -59,7 +61,7 @@ function render() {
       const time = document.createElement('time'); time.dateTime = receipt.at; time.textContent = new Date(receipt.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       item.append(number, title, proof, time); return item;
     }));
-  }
+  } else $('receipts').replaceChildren(emptyLog);
 }
 
 $('connect').addEventListener('click', async () => {
@@ -98,13 +100,16 @@ async function commit(action, target) {
     $('cancel').disabled = true;
     const previous = state.location;
     state = await api('commit', { id: challenge.id, ...proof });
-    if (state.location !== previous) { const star = sector(state.location); ship = { x: star.x, y: star.y }; }
+    if (state.location !== previous) dock();
     selected = state.location;
     notice(action === 'launch' ? 'Signature verified. The stars are yours.' : action === 'jump' ? 'Jump committed. Welcome to ' + sector(target).name + '.' : sector(target).artifact + ' secured.');
     canvas.focus();
   } catch (error) {
     if (!cancelled) notice(error.message);
     if (challenge) await api('cancel', {}).catch(() => {});
+    // The server may have restarted or expired this session; show the game it actually has.
+    state = await api('state').catch(() => state);
+    if (!state.started) dock();
   } finally { $('approval').close(); busy = false; render(); }
 }
 $('launch').addEventListener('click', () => commit('launch', 'sol'));
@@ -120,7 +125,7 @@ async function cancel() {
 $('cancel').addEventListener('click', cancel);
 $('approval').addEventListener('cancel', (event) => { event.preventDefault(); void cancel(); });
 $('export').addEventListener('click', () => {
-  const url = URL.createObjectURL(new Blob([JSON.stringify({ protocol: 'starproof/v1', receipts: state.receipts }, null, 2)], { type: 'application/json' }));
+  const url = URL.createObjectURL(new Blob([JSON.stringify({ protocol: PROTOCOL, receipts: state.receipts }, null, 2)], { type: 'application/json' }));
   const link = document.createElement('a'); link.href = url; link.download = 'starproof-receipts.json'; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
 });
 
@@ -132,13 +137,14 @@ function scan() {
   notice('Signal: ' + nearest.world + '. ' + nearest.description + ' Scan complete; no signature needed.');
 }
 addEventListener('keydown', (event) => {
-  if (event.target.closest('button, input, textarea, select') || $('approval').open) return;
-  if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'w', 'a', 's', 'd'].includes(event.key)) {
-    event.preventDefault(); keys.add(event.key);
-    if (event.key === ' ' && !event.repeat) scan();
+  if (event.target.closest('button, input, textarea, select') || $('approval').open || event.metaKey || event.ctrlKey || event.altKey) return;
+  // event.code ignores Shift/Caps Lock, so a keyup always matches its keydown.
+  if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(event.code)) {
+    event.preventDefault(); keys.add(event.code);
+    if (event.code === 'Space' && !event.repeat) scan();
   }
 });
-addEventListener('keyup', (event) => keys.delete(event.key));
+addEventListener('keyup', (event) => keys.delete(event.code));
 addEventListener('blur', () => keys.clear());
 canvas.addEventListener('click', (event) => {
   const box = canvas.getBoundingClientRect(), x = (event.clientX - box.left) / box.width, y = (event.clientY - box.top) / box.height;
@@ -153,8 +159,8 @@ function frame(time) {
   if (canvas.width !== Math.round(box.width * dpr) || canvas.height !== Math.round(box.height * dpr)) { canvas.width = Math.round(box.width * dpr); canvas.height = Math.round(box.height * dpr); }
   const w = box.width, h = box.height; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h);
   if (state.started && !busy && !$('approval').open) {
-    ship.x += ((keys.has('d') || keys.has('ArrowRight') ? 1 : 0) - (keys.has('a') || keys.has('ArrowLeft') ? 1 : 0)) * dt * .18;
-    ship.y += ((keys.has('s') || keys.has('ArrowDown') ? 1 : 0) - (keys.has('w') || keys.has('ArrowUp') ? 1 : 0)) * dt * .18;
+    ship.x += ((keys.has('KeyD') || keys.has('ArrowRight') ? 1 : 0) - (keys.has('KeyA') || keys.has('ArrowLeft') ? 1 : 0)) * dt * .18;
+    ship.y += ((keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0) - (keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0)) * dt * .18;
     ship.x = Math.max(.04, Math.min(.96, ship.x)); ship.y = Math.max(.08, Math.min(.89, ship.y));
   }
   ctx.strokeStyle = '#23394645'; ctx.lineWidth = .5;
@@ -182,5 +188,5 @@ function frame(time) {
   requestAnimationFrame(frame);
 }
 render(); requestAnimationFrame(frame);
-try { state = await api('state'); const here = sector(state.location); ship = { x: here.x, y: here.y }; render(); }
+try { state = await api('state'); dock(); render(); }
 catch (error) { notice(error.message); }
