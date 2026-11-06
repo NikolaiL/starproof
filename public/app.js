@@ -68,7 +68,6 @@ $('connect').addEventListener('click', async () => {
   busy = true; render();
   try {
     if (signer.port && deviceReady) { await signer.disconnect(); return; }
-    if (signer.port) await signer.disconnect();
     await signer.connect();
     const identity = await api('device', { cert: signer.cert });
     deviceReady = true;
