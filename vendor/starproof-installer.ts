@@ -20,7 +20,16 @@ export async function runInstall(r: Repl, bundle: any, onProgress: (p: number, w
   const hello = await r.hello(2000);
   const version = String(hello?.version || '').split('.').map(Number);
   if (!hello?.fw?.startsWith('wedgie-') || version.length !== 3 || version.some(Number.isNaN) || version[0] === 0 && version[1] === 3 && version[2] < 76 || version[0] === 0 && version[1] < 3) throw new Error('Update Wedgie firmware at wedgie.dev/connect first (0.3.76+ required).');
-  if (hello.chip !== 'OPTIGA Trust M') throw new Error('Starproof requires an OPTIGA Trust M chip.');
+  // Firmware leaves hello.chip null until its first chip check after boot.
+  let chip = hello.chip;
+  if (chip == null) {
+    onProgress(0, 'Checking the secure chip');
+    const proof = await r.request({ type: 'chip' }, 15000);
+    if (proof.busy) throw new Error('Wedgie’s secure chip is busy. Finish the current device action, then connect again.');
+    if (proof.type !== 'chip' || proof.error) throw new Error('Could not check Wedgie’s secure chip. Reconnect it and try again.');
+    chip = proof.chip;
+  }
+  if (chip !== 'OPTIGA Trust M') throw new Error('Starproof requires an OPTIGA Trust M chip.');
   if (hello.sealed && !hello.open) {
     const reply = await r.request({ type: 'open', for: 'Install Starproof' }, 65000);
     if (reply.type !== 'open') throw new Error('Installation declined or timed out. Nothing was installed.');
