@@ -50,6 +50,14 @@ test('shared sessions restore across instances and atomically consume a pending 
   assert.deepEqual(upgraded.result.claims, ['kepler']);
   assert.deepEqual(upgraded.result.maps, ['home', 'nebula']);
   assert.equal((await a.run(first.id, verifier, (session) => session.game.fuel)).result, 3);
+  const veteran = JSON.parse(records.get(key));
+  veteran.game.claims = ['kepler', 'lyra', 'cinder', 'moss'];
+  veteran.game.maps = ['home', 'nebula', 'frontier'];
+  records.set(key, JSON.stringify(veteran));
+  const expanded = await b.run(first.id, verifier, session => session.game.state());
+  assert.ok(expanded.result.maps.includes('north') && expanded.result.maps.includes('south'));
+  assert.equal(expanded.result.fuel, 3, 'galaxy expansion must not reset existing resources');
+  assert.deepEqual(expanded.result.claims, veteran.game.claims);
   for (let i = 0; i < 9; i++) await a.run(null, verifier, () => null);
   await assert.rejects(a.run(null, verifier, () => null), /Too many new missions/);
 });

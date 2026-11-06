@@ -24,7 +24,7 @@ def ask(*args, **kwargs):
 sys.modules["lcd"] = types.SimpleNamespace(Keys=Keys)
 sys.modules["ui"] = types.SimpleNamespace(ask=ask, progress=lambda *a, **k: None, page=lambda *a, **k: None, INK=1, MUTED=2)
 sys.modules["wedgie"] = types.SimpleNamespace(send=sent.append)
-sys.modules["starproof_art"] = types.SimpleNamespace(MissionDisplay=object)
+sys.modules["starproof_art"] = types.SimpleNamespace(MissionDisplay=object, dashboard=lambda *a: None)
 import starproof
 from starproof_protocol import parse_action
 

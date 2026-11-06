@@ -9,7 +9,7 @@ import { execFileSync } from 'node:child_process';
 import { X509Certificate, sign } from 'node:crypto';
 import { createTrustVerifier } from 'wedgie-actions/server';
 import { Game } from '../lib/game.js';
-import { SECTORS, jumpCost } from '../public/protocol.js';
+import { SECTORS, MAPS, chartedWorlds, jumpCost } from '../public/protocol.js';
 import { createApp } from '../server.js';
 
 const deviceDir = fileURLToPath(new URL('device/', new URL('.', import.meta.resolve('starproof-device/package.json'))));
@@ -80,6 +80,57 @@ test('expired, cancelled, cross-session and replaced challenges cannot commit', 
   assert.throws(() => other.complete(otherChallenge.id, signText(fresh.text)), /did not sign/);
 });
 
+test('demo confirmation settings default to signed actions, preserve launch approval and never fabricate proofs', () => {
+  const game = new Game(verifier);
+  assert.throws(() => game.act('jump', 'kepler'), /requires Wedgie/);
+  assert.throws(() => game.setConfirmations({ launch: false }), /Invalid/);
+  assert.throws(() => game.setConfirmations({ jump: false, claim: 'false' }), /Invalid/);
+  assert.equal(game.confirmations.jump, true, 'invalid settings cannot partially apply');
+  game.setConfirmations({ jump: false, claim: false, refuel: false, scavenge: false });
+  assert.throws(() => game.act('launch', 'sol'), /requires Wedgie/);
+  assert.throws(() => game.act('jump', 'kepler'), /Sign the launch/);
+  approved(game, 'launch', 'sol');
+  const chip = game.device;
+  assert.throws(() => game.act('jump', 'rift'), /star map/);
+  game.act('jump', 'kepler');
+  game.act('claim', 'kepler');
+  game.act('refuel', 'kepler');
+  game.fuel = 0;
+  game.act('scavenge', 'kepler');
+  assert.equal(game.fuel, 2);
+  assert.equal(game.device, chip);
+  for (const receipt of game.receipts.slice(0, 4)) {
+    assert.equal(receipt.verification, 'demo');
+    assert.equal(receipt.cert, undefined); assert.equal(receipt.r, undefined); assert.equal(receipt.text, undefined);
+  }
+  assert.equal(game.receipts.at(-1).verification, 'trustm');
+  const pending = game.challenge('jump', 'sol', certificate, origin);
+  game.setConfirmations({ jump: true });
+  assert.throws(() => game.complete(pending.id, signText(pending.text)), /unknown/);
+  assert.throws(() => game.act('jump', 'sol'), /requires Wedgie/);
+});
+
+test('HTTP confirmation switches are mission-local and unsigned actions retain origin and launch checks', async (t) => {
+  const app = createApp(verifier);
+  await new Promise(resolve => app.listen(0, '127.0.0.1', resolve));
+  t.after(() => new Promise(resolve => app.close(resolve)));
+  const base = `http://127.0.0.1:${app.address().port}`;
+  const cookie = (await fetch(base + '/api/state')).headers.get('set-cookie').split(';')[0];
+  const post = (path, body, extra = {}) => fetch(base + '/api/' + path, { method: 'POST', headers: { 'content-type': 'application/json', cookie, ...extra }, body: JSON.stringify(body) });
+  assert.equal((await post('settings', { jump: false }, { origin: 'https://evil.example' })).status, 403);
+  assert.equal((await post('settings', { launch: false })).status, 400);
+  assert.equal((await post('settings', { jump: false })).status, 200);
+  assert.equal((await post('act', { action: 'jump', target: 'kepler' })).status, 400);
+  const launch = await (await post('challenge', { action: 'launch', target: 'sol', cert: certificate })).json();
+  assert.equal((await post('commit', { id: launch.id, ...signText(launch.text) })).status, 200);
+  const travel = await (await post('act', { action: 'jump', target: 'kepler' })).json();
+  assert.equal(travel.location, 'kepler');
+  assert.equal(travel.receipts[0].verification, 'demo');
+  assert.equal((await post('act', { action: 'claim', target: 'kepler' })).status, 400);
+  const another = await (await fetch(base + '/api/state')).json();
+  assert.equal(another.confirmations.jump, true);
+});
+
 test('fuel caches, paid refills, distance pricing and scavenging keep exploration playable', () => {
   const game = new Game(verifier);
   approved(game, 'launch', 'sol');
@@ -125,19 +176,21 @@ test('fuel caches, paid refills, distance pricing and scavenging keep exploratio
   assert.throws(() => game.challenge('claim', 'moss', certificate, origin), /chip that launched/);
 });
 
-test('all six artifacts can be recovered without grinding or buying fuel', () => {
+test('all twenty artifacts and branching charts can be recovered without paid fuel or grinding', () => {
   const game = new Game(verifier);
   approved(game, 'launch', 'sol');
-  for (const target of ['sol', 'kepler', 'vega', 'lyra', 'cinder', 'moss']) {
+  while (game.claims.length < SECTORS.length) {
+    const target = chartedWorlds(game.maps).find(world => !game.claims.includes(world.id))?.id;
+    assert.ok(target, 'every chart has a reachable route to the next discoveries');
     if (target !== game.location) {
       if (game.fuel < jumpCost(game.location, target)) approved(game, 'refuel', game.location);
       approved(game, 'jump', target);
     }
     approved(game, 'claim', target);
   }
-  assert.equal(game.claims.length, 6);
-  assert.equal(game.credits, 32);
-  assert.deepEqual(game.maps, ['home', 'nebula', 'frontier']);
+  assert.equal(game.claims.length, 20);
+  assert.equal(game.credits, 88);
+  assert.deepEqual([...game.maps].sort(), MAPS.map(map => map.id).sort());
 });
 
 test('MicroPython parser accepts the exact browser format and rejects hidden/unsupported actions', () => {

@@ -10,12 +10,16 @@ The verifier trusts its deployed code, the game's authoritative state, its clock
 - A software key or self-signed certificate claiming to be Trust M.
 - A signature over a different destination, cost, action, origin or mission.
 - Reusing an already committed action, an expired challenge, or a browser-cancelled request.
-- Spending fuel/credits, refuelling, unlocking maps or claiming an artifact without going through the verified strategic state transition.
+- Spending fuel/credits, unlocking maps or claiming artifacts outside the authoritative game rules. With a confirmation switch on, that transition also requires a valid chip signature.
 - Replacing the chip midway through the expedition.
 
 `npm test` here and in wedgie-actions covers these properties with a separate ephemeral PKI. The production verifier never loads that test PKI.
 
 Remote cancellation is a denial only: it polls while the physical approval dialog is open, validates the active request ID, and never injects a green press. The browser independently invalidates the server challenge. Cancellation cannot retract a signature already generated.
+
+The per-mission demo switches deliberately allow unsigned travel, collection, refuelling and scavenging when disabled. Launch remains signed, and ordinary location, fuel, credit, map and one-time reward rules still apply. These settings are available to the session owner, not protected by an admin role. Unsigned receipts never contain fabricated chip evidence. A changed setting clears pending approvals.
+
+Joystick/button telemetry is untrusted navigation input. It can request a game action, but never resolve a signature request. Browser stats only update the idle screen; they cannot replace signed labels or execute while a signing prompt is pending.
 
 The first-run installer writes only the pinned Starproof app files and `apps.json`, after full-control approval. It verifies bundle checksums before access and file checksums on device. An interrupted update may need reinstalling through wedgie.dev. Community app installation is not manufacturer-reviewed firmware attestation.
 

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mapPoint, planetAction } from '../public/navigation.js';
+import { mapPoint, planetAction, focusCamera, smoothCamera } from '../public/navigation.js';
 import { chartBounds, chartedWorlds } from '../public/protocol.js';
 
 test('planet controls distinguish collecting, revisiting, insufficient fuel and device readiness', () => {
@@ -21,21 +21,30 @@ test('planet controls distinguish collecting, revisiting, insufficient fuel and 
   });
 });
 
-test('planet labels and controls fit without overlapping across chart sizes and discoveries', () => {
-  for (const [width, height, controlWidth, controlHeight] of [[298, 520, 104, 82], [368, 520, 112, 82], [660, 520, 112, 87], [740, 460, 112, 87], [1034, 460, 112, 87], [1214, 365, 156, 87]]) {
-    for (const maps of [['home'], ['home', 'nebula'], ['home', 'nebula', 'frontier']]) {
-      const worlds = chartedWorlds(maps), bounds = chartBounds(worlds);
-      const controls = worlds.map((world) => {
-        const point = mapPoint(world, bounds, width, height);
-        const top = point.y + (width < 760 ? 24 : 44.4);
-        return { id: world.id, left: point.x - controlWidth / 2, top, right: point.x + controlWidth / 2, bottom: top + controlHeight };
-      });
-      for (const a of controls) {
-        assert.ok(a.left >= 0 && a.right <= width && a.top >= 0 && a.bottom <= height, `${width}px: ${a.id} stays inside the map`);
-        for (const b of controls) if (a.id !== b.id) {
-          assert.ok(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom, `${width}px: ${a.id} and ${b.id} controls overlap`);
-        }
-      }
+test('galaxy view fits all worlds and focused cameras preserve north, south and selected position', () => {
+  const worlds = chartedWorlds(['home', 'nebula', 'frontier', 'north', 'south', 'west']);
+  const bounds = chartBounds(worlds);
+  for (const [width, height] of [[298, 520], [368, 520], [740, 460], [1214, 365]]) {
+    for (const world of worlds) {
+      const overview = mapPoint(world, bounds, width, height);
+      assert.ok(overview.x > 0 && overview.x < width && overview.y > 0 && overview.y < height);
+      const camera = focusCamera(world, bounds, width, height);
+      assert.deepEqual(mapPoint(world, bounds, width, height, camera), { x: width / 2, y: height / 2 });
+      assert.ok(camera.zoom >= 1 && camera.zoom <= 6);
+      const east = mapPoint({ x: world.x + 1, y: world.y }, bounds, width, height, camera);
+      const north = mapPoint({ x: world.x, y: world.y - 1 }, bounds, width, height, camera);
+      assert.ok(east.x > width / 2 && north.y < height / 2);
     }
   }
+});
+
+test('camera zoom and pan ease toward the target without overshooting, with a reduced-motion snap', () => {
+  const start = { x: 0, y: 3, zoom: 1 }, target = { x: 4, y: -2, zoom: 3 };
+  const next = smoothCamera(start, target, 1 / 60);
+  assert.ok(next.x > 0 && next.x < 4 && next.zoom > 1 && next.zoom < 3);
+  let view = start;
+  for (let i = 0; i < 90; i++) view = smoothCamera(view, target, 1 / 60);
+  assert.ok(Math.abs(view.zoom - target.zoom) < .0001 && Math.abs(view.x - target.x) < .0001);
+  assert.deepEqual(smoothCamera(start, target, 0, true), target);
+  assert.deepEqual(smoothCamera(start, target, 0), start);
 });

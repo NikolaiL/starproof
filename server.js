@@ -6,12 +6,13 @@ import { trustM } from 'wedgie-actions/server';
 
 const PUBLIC = new URL('./public/', import.meta.url);
 const FILES = { '/': ['index.html', 'text/html'], '/style.css': ['style.css', 'text/css'],
+  '/launch-crew.svg': ['launch-crew.svg', 'image/svg+xml'],
   '/app.js': ['app.js', 'text/javascript'], '/graphics.js': ['graphics.js', 'text/javascript'], '/navigation.js': ['navigation.js', 'text/javascript'], '/approval.js': ['approval.js', 'text/javascript'],
   '/device-install.json': ['device-install.json', 'application/json'], '/vendor/installer.js': ['vendor/installer.js', 'text/javascript'],
   '/wedgie-model.js': ['wedgie-model.js', 'text/javascript'], '/vendor/wedgie3d.js': ['vendor/wedgie3d.js', 'text/javascript'],
   '/3d/wedgie.json': ['3d/wedgie.json', 'application/json'], '/3d/wedgie.bin': ['3d/wedgie.bin', 'application/octet-stream'],
   '/sdk.js': [new URL(import.meta.resolve('wedgie-actions/browser')), 'text/javascript'], '/protocol.js': ['protocol.js', 'text/javascript'] };
-const ROUTES = new Set(['GET /api/state', 'POST /api/device', 'POST /api/challenge', 'POST /api/commit', 'POST /api/cancel']);
+const ROUTES = new Set(['GET /api/state', 'POST /api/device', 'POST /api/challenge', 'POST /api/commit', 'POST /api/cancel', 'POST /api/settings', 'POST /api/act']);
 
 // Tests pass an ephemeral test PKI; the running server always uses the production verifier.
 export function createHandler(verifier = trustM, { store, origin: configuredOrigin = process.env.APP_ORIGIN } = {}) {
@@ -63,6 +64,8 @@ export function createHandler(verifier = trustM, { store, origin: configuredOrig
         if (session.requests.length >= 30) return reply({ error: 'Too many requests. Wait a minute.' }, 429);
         session.requests.push(now);
         try {
+          if (path === '/api/settings') return reply(session.game.setConfirmations(body));
+          if (path === '/api/act') return reply(session.game.act(body.action, body.target));
           if (path === '/api/device') return reply({ fingerprint: verifier.identity(body.cert).fingerprint });
           if (path === '/api/challenge') return reply(session.game.challenge(body.action, body.target, body.cert, origin));
           if (path === '/api/commit') return reply(session.game.complete(body.id, { r: body.r, s: body.s }));
