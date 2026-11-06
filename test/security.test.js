@@ -126,7 +126,11 @@ test('HTTP serves the game, isolates sessions and refuses cross-origin, oversize
   const sdkText = await sdk.text();
   assert.match(sdkText, /constructor\(app\)/);
   assert.doesNotMatch(sdkText, /starproof_hello/);
+  const unknown = await fetch(base + '/api/unknown');
+  assert.equal(unknown.status, 404);
+  assert.equal(unknown.headers.get('set-cookie'), null);
   const response = await fetch(base + '/api/state');
+  assert.doesNotMatch(response.headers.get('set-cookie'), /max-age/i);
   const cookie = response.headers.get('set-cookie').split(';')[0];
   assert.equal((await response.json()).started, false);
   const post = (path, body, extra = {}) => fetch(base + '/api/' + path, { method: 'POST', headers: { 'content-type': 'application/json', cookie, ...extra }, body: JSON.stringify(body) });
@@ -137,4 +141,23 @@ test('HTTP serves the game, isolates sessions and refuses cross-origin, oversize
   assert.equal((await post('device', { cert: '0'.repeat(17_000) })).status, 413);
   assert.equal((await fetch(base + '/api/state', { headers: { cookie } })).headers.get('set-cookie'), null);
   assert.equal((await fetch(base + '/../../server.js')).status, 404);
+});
+
+test('HTTP commits a signed action, honors cancel and keeps launched games when sessions fill up', async (t) => {
+  const app = createApp(verifier);
+  await new Promise((resolve) => app.listen(0, '127.0.0.1', resolve));
+  t.after(() => new Promise((resolve) => app.close(resolve)));
+  const base = `http://127.0.0.1:${app.address().port}`;
+  const cookie = (await fetch(base + '/api/state')).headers.get('set-cookie').split(';')[0];
+  const post = async (path, body) => (await fetch(base + '/api/' + path, { method: 'POST', headers: { 'content-type': 'application/json', cookie }, body: JSON.stringify(body) })).json();
+  const launch = await post('challenge', { cert: certificate, action: 'launch', target: 'sol' });
+  assert.ok(launch.text.startsWith(`starproof/v1\norigin=${base}\n`));
+  assert.equal((await post('commit', { id: launch.id, ...signText(launch.text) })).started, true);
+  const jump = await post('challenge', { cert: certificate, action: 'jump', target: 'vega' });
+  assert.deepEqual(await post('cancel', {}), { cancelled: true });
+  assert.match((await post('commit', { id: jump.id, ...signText(jump.text) })).error, /cancelled/);
+  for (let i = 0; i < 100; i++) assert.equal((await fetch(base + '/api/state')).status, 200);
+  const state = await (await fetch(base + '/api/state', { headers: { cookie } })).json();
+  assert.equal(state.started, true);
+  assert.equal(state.location, 'sol');
 });

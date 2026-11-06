@@ -8,8 +8,10 @@ import { trustM } from 'wedgie-actions/server';
 const PUBLIC = new URL('./public/', import.meta.url);
 const FILES = { '/': ['index.html', 'text/html'], '/style.css': ['style.css', 'text/css'],
   '/app.js': ['app.js', 'text/javascript'], '/sdk.js': [new URL(import.meta.resolve('wedgie-actions/browser')), 'text/javascript'], '/protocol.js': ['protocol.js', 'text/javascript'] };
+const ROUTES = new Set(['GET /api/state', 'POST /api/device', 'POST /api/challenge', 'POST /api/commit', 'POST /api/cancel']);
 
-export function createApp() {
+// Tests pass an ephemeral test PKI; the running server always uses the production verifier.
+export function createApp(verifier = trustM) {
   const sessions = new Map();
   return createServer(async (req, res) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -29,6 +31,7 @@ export function createApp() {
       if (!path.startsWith('/api/')) return json({ error: 'Not found.' }, 404);
       if (req.headers.origin && req.headers.origin !== origin) return json({ error: 'Cross-origin requests are refused.' }, 403);
       if (req.headers['sec-fetch-site'] === 'cross-site') return json({ error: 'Cross-site requests are refused.' }, 403);
+      if (!ROUTES.has(`${req.method} ${path}`)) return json({ error: 'Not found.' }, 404);
       let body = {};
       if (req.method === 'POST') {
         if (!req.headers['content-type']?.startsWith('application/json')) return json({ error: 'JSON required.' }, 415);
@@ -46,20 +49,25 @@ export function createApp() {
       const cookie = /(?:^|;\s*)starproof=([0-9a-f]{64})(?:;|$)/.exec(req.headers.cookie || '')?.[1];
       let session = cookie && sessions.get(cookie);
       if (!session) {
-        if (sessions.size >= 100) return json({ error: 'Too many sessions. Restart the local demo server.' }, 429);
+        if (sessions.size >= 100) {
+          // ponytail: evicts the oldest unlaunched game; add per-client limits before serving beyond localhost.
+          const idle = [...sessions].find(([, entry]) => !entry.game.started)?.[0];
+          if (!idle) return json({ error: 'Too many sessions. Restart the local demo server.' }, 429);
+          sessions.delete(idle);
+        }
         const id = randomBytes(32).toString('hex');
-        session = { game: new Game(trustM), last: now, requests: [] };
+        session = { game: new Game(verifier), last: now, requests: [] };
         sessions.set(id, session);
-        res.setHeader('Set-Cookie', `starproof=${id}; HttpOnly; SameSite=Strict; Path=/; Max-Age=7200`);
+        // No Max-Age: the server expires sessions after two idle hours.
+        res.setHeader('Set-Cookie', `starproof=${id}; HttpOnly; SameSite=Strict; Path=/`);
       }
       session.last = now;
-      if (req.method === 'GET' && path === '/api/state') return json(session.game.state());
-      if (req.method !== 'POST') return json({ error: 'Not found.' }, 404);
+      if (path === '/api/state') return json(session.game.state());
       session.requests = session.requests.filter((time) => now - time < 60_000);
       if (session.requests.length >= 30) return json({ error: 'Too many requests. Wait a minute.' }, 429);
       session.requests.push(now);
       if (path === '/api/device') {
-        const device = trustM.identity(body.cert);
+        const device = verifier.identity(body.cert);
         return json({ fingerprint: device.fingerprint });
       }
       if (path === '/api/challenge') return json(session.game.challenge(body.action, body.target, body.cert, origin));
