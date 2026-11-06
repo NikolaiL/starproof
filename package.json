@@ -26,6 +26,6 @@
   },
   "devDependencies": {
     "esbuild": "^0.28.2",
-    "starproof-device": "https://codeload.github.com/NikolaiL/wedgie-starproof/tar.gz/33a1481d3c0ae2eb5aac9ea679e12da906a15460"
+    "starproof-device": "https://codeload.github.com/NikolaiL/wedgie-starproof/tar.gz/5ee45a9a7c4e8c4fce578503486441a2ce815f78"
   }
 }
