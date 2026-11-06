@@ -36,8 +36,8 @@ sys.modules["ui"] = types.SimpleNamespace(WHITE=0, INK=1, GREEN=2, GREEN_D=3, RE
 from starproof_art import preview, COLORS
 
 for target in COLORS:
-    for action in ("jump", "claim", "refuel"):
-        for cost in (("0", "3") if action == "refuel" else ("1",)):
+    for action in ("jump", "claim", "refuel", "scavenge"):
+        for cost in (("0", "4") if action == "refuel" else ("1",)):
             preview(Display(), {"action": action, "target": target, "from": "sol", "cost": cost,
                 "origin": "https://starproof-wedgie.vercel.app", "session": "f" * 32})
 print("device art preserves controls OK")

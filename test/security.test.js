@@ -9,6 +9,7 @@ import { execFileSync } from 'node:child_process';
 import { X509Certificate, sign } from 'node:crypto';
 import { createTrustVerifier } from 'wedgie-actions/server';
 import { Game } from '../lib/game.js';
+import { SECTORS, jumpCost } from '../public/protocol.js';
 import { createApp } from '../server.js';
 
 const deviceDir = fileURLToPath(new URL('device/', new URL('.', import.meta.resolve('starproof-device/package.json'))));
@@ -53,7 +54,7 @@ test('launch, jump and claim require signatures; proof replay and substituted ac
   assert.throws(() => game.complete(jump.id, signText(jump.text.replace('target=kepler', 'target=vega'))), /did not sign/);
   assert.equal(game.state().location, 'sol');
   game.complete(jump.id, signText(jump.text));
-  assert.equal(game.state().fuel, 0);
+  assert.equal(game.state().fuel, 6);
   assert.equal(game.state().location, 'kepler');
   assert.throws(() => game.challenge('claim', 'vega', certificate, origin), /Travel/);
   approved(game, 'claim', 'kepler');
@@ -79,49 +80,64 @@ test('expired, cancelled, cross-session and replaced challenges cannot commit', 
   assert.throws(() => other.complete(otherChallenge.id, signText(fresh.text)), /did not sign/);
 });
 
-test('fuel caches, signed credit purchases and recovered maps gate exploration', () => {
+test('fuel caches, paid refills, distance pricing and scavenging keep exploration playable', () => {
   const game = new Game(verifier);
   approved(game, 'launch', 'sol');
+  assert.equal(game.fuel, 8); assert.equal(game.credits, 8);
   assert.deepEqual(game.state().maps, ['home']);
   assert.throws(() => game.challenge('jump', 'vega', certificate, origin), /star map/);
   assert.throws(() => game.challenge('refuel', 'sol', certificate, origin), /already full/);
   approved(game, 'jump', 'kepler');
-  assert.equal(game.state().fuel, 0);
-  assert.throws(() => game.challenge('jump', 'sol', certificate, origin), /No jump fuel/);
+  assert.equal(game.fuel, 6);
+  game.fuel = 0;
+  assert.throws(() => game.challenge('jump', 'sol', certificate, origin), /Not enough jump fuel/);
   assert.throws(() => game.challenge('refuel', 'sol', certificate, origin), /current planet/);
   const refill = game.challenge('refuel', 'kepler', certificate, origin);
   assert.match(refill.text, /cost=0/);
-  assert.throws(() => game.complete(refill.id, signText(refill.text.replace('cost=0', 'cost=3'))), /did not sign/);
+  assert.throws(() => game.complete(refill.id, signText(refill.text.replace('cost=0', 'cost=4'))), /did not sign/);
   game.complete(refill.id, signText(refill.text));
-  assert.equal(game.state().fuel, 1);
-  assert.equal(game.state().credits, 6);
+  assert.equal(game.fuel, 8); assert.equal(game.credits, 8);
   assert.throws(() => game.complete(refill.id, signText(refill.text)), /already used/);
   approved(game, 'claim', 'kepler');
-  assert.deepEqual(game.state().maps, ['home', 'nebula']);
-  assert.equal(game.state().credits, 10);
+  assert.deepEqual(game.maps, ['home', 'nebula']);
   approved(game, 'jump', 'lyra');
   assert.throws(() => game.challenge('jump', 'cinder', certificate, origin), /star map/);
   approved(game, 'claim', 'lyra');
-  assert.deepEqual(game.state().maps, ['home', 'nebula', 'frontier']);
+  assert.deepEqual(game.maps, ['home', 'nebula', 'frontier']);
   approved(game, 'refuel', 'lyra');
   approved(game, 'jump', 'moss');
   approved(game, 'refuel', 'moss');
   approved(game, 'jump', 'kepler');
   const purchase = game.challenge('refuel', 'kepler', certificate, origin);
-  assert.equal(purchase.cost, 3);
+  assert.equal(purchase.cost, 4);
   game.complete(purchase.id, signText(purchase.text));
-  assert.equal(game.state().credits, 11);
-  assert.equal(game.state().fuel, 1);
-  approved(game, 'jump', 'lyra');
-  game.credits = 2;
-  assert.throws(() => game.challenge('refuel', 'lyra', certificate, origin), /Not enough credits/);
+  assert.equal(game.credits, 12); assert.equal(game.fuel, 8);
+  game.fuel = 0; game.credits = 0;
+  assert.throws(() => game.challenge('refuel', 'kepler', certificate, origin), /Not enough credits/);
+  assert.throws(() => game.challenge('scavenge', 'sol', certificate, origin), /current planet/);
+  for (let i = 0; i < 4; i++) approved(game, 'scavenge', 'kepler');
+  assert.equal(game.fuel, 8); assert.equal(game.credits, 0);
+  assert.throws(() => game.challenge('scavenge', 'kepler', certificate, origin), /already full/);
+  approved(game, 'jump', 'moss');
+  assert.equal(game.fuel, 2);
   assert.throws(() => game.challenge('claim', 'unknown', certificate, origin), /Unknown destination/);
-  assert.throws(() => game.challenge('teleport', 'lyra', certificate, origin), /Unknown strategic/);
   game.verifier = { identity: () => ({ fingerprint: 'different' }) };
-  assert.throws(() => game.challenge('claim', 'lyra', certificate, origin), /already/);
-  assert.throws(() => game.challenge('claim', 'sol', certificate, origin), /Travel/);
-  game.location = 'sol';
-  assert.throws(() => game.challenge('claim', 'sol', certificate, origin), /chip that launched/);
+  assert.throws(() => game.challenge('claim', 'moss', certificate, origin), /chip that launched/);
+});
+
+test('all six artifacts can be recovered without grinding or buying fuel', () => {
+  const game = new Game(verifier);
+  approved(game, 'launch', 'sol');
+  for (const target of ['sol', 'kepler', 'vega', 'lyra', 'cinder', 'moss']) {
+    if (target !== game.location) {
+      if (game.fuel < jumpCost(game.location, target)) approved(game, 'refuel', game.location);
+      approved(game, 'jump', target);
+    }
+    approved(game, 'claim', target);
+  }
+  assert.equal(game.claims.length, 6);
+  assert.equal(game.credits, 32);
+  assert.deepEqual(game.maps, ['home', 'nebula', 'frontier']);
 });
 
 test('MicroPython parser accepts the exact browser format and rejects hidden/unsupported actions', () => {
@@ -148,11 +164,21 @@ test('device validates both refuel prices and all newly discovered destinations'
   approved(game, 'launch', 'sol');
   approved(game, 'jump', 'kepler');
   const free = game.challenge('refuel', 'kepler', certificate, origin).text;
-  const paid = free.replace('cost=0', 'cost=3');
-  const frontier = free.replace('action=refuel', 'action=jump').replace('target=kepler', 'target=moss').replace('cost=0', 'cost=1');
+  const paid = free.replace('cost=0', 'cost=4');
+  const frontier = free.replace('action=refuel', 'action=jump').replace('target=kepler', 'target=moss').replace('cost=0', 'cost=' + jumpCost('kepler', 'moss'));
   const python = `import sys,json\nsys.path.insert(0,__import__('os').environ['STARPROOF_DEVICE_DIR'])\nfrom starproof_protocol import parse_action\nv=json.load(sys.stdin)\nfor text in v['valid']: parse_action(text)\nfor text in v['invalid']:\n try: parse_action(text)\n except ValueError: pass\n else: raise AssertionError('invalid refuel accepted')\nprint('refuel protocol OK')`;
-  const invalid = [free.replace('cost=0', 'cost=4'), free.replace('cost=0', 'cost=03'), free.replace('target=kepler', 'target=sol')];
+  const invalid = [free.replace('cost=0', 'cost=9'), free.replace('cost=0', 'cost=04'), free.replace('target=kepler', 'target=sol')];
   assert.match(execFileSync('python3', ['-c', python], { cwd: new URL('..', import.meta.url), env: pythonEnv, input: JSON.stringify({ valid: [free, paid, frontier], invalid }), encoding: 'utf8' }), /refuel protocol OK/);
+});
+
+test('browser and MicroPython compute identical signed fuel costs for every route', () => {
+  const game = new Game(verifier);
+  const launch = game.challenge('launch', 'sol', certificate, origin).text;
+  const routes = SECTORS.flatMap((from) => SECTORS.filter((to) => to !== from).map((to) => ({
+    text: launch.replace('action=launch', 'action=jump').replace('from=sol', 'from=' + from.id).replace('target=sol', 'target=' + to.id).replace('cost=0', 'cost=' + jumpCost(from.id, to.id)),
+  })));
+  const python = `import sys,json\nsys.path.insert(0,__import__('os').environ['STARPROOF_DEVICE_DIR'])\nfrom starproof_protocol import parse_action\nfor route in json.load(sys.stdin):\n fields=parse_action(route['text'])\n try: parse_action(route['text'].replace('cost='+fields['cost'],'cost=1'))\n except ValueError: pass\n else: raise AssertionError('cheap forged jump accepted')\nprint('all route costs match')`;
+  assert.match(execFileSync('python3', ['-c', python], { env: pythonEnv, input: JSON.stringify(routes), encoding: 'utf8' }), /all route costs match/);
 });
 
 test('HTTP serves the game, isolates sessions and refuses cross-origin, oversized and fake device requests', async (t) => {

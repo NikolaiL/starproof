@@ -29,14 +29,16 @@ The game pins this device repo as `starproof-device` and builds a same-origin bu
 1. Connect Wedgie. The server validates its certificate; this alone is not proof of key possession.
 2. **Let’s launch** and press green on Wedgie. A valid factory-key signature starts the mission.
 3. Fly with WASD/arrows. Space or **Send a sonar ping** scans the nearest system; select destinations on the chart or its buttons. Kepler’s Jelly Sentinel and Vega’s Moon Muncher react to your ping.
-4. **Jump here** consumes the entire one-jump tank and requires a signature. Refill before every further jump.
-5. **Refuel** collects one free fuel cache per planet. After that, a refill costs **3 in-game credits**, shown on both screens and bound into the signature. Start with 6 credits; each artifact pays 4. These credits have no real-world value.
-6. **Bag the artifact** collects the current planet’s unique loot. Kepler also contains the **Nebula Reach** map (Vega and Lyra); Lyra contains the **Wild Frontier** map (Cinder and Moss). Select recovered maps above the chart. Locked regions cannot be reached, including through direct API requests.
+4. **Jump here** spends **2–8 fuel based on distance** and requires a signature. The tank holds 8; short hops preserve fuel, while Sol–Moss consumes a full tank. The chart shows the exact cost before approval.
+5. **Refuel** uses one free full-tank cache per planet; later full refills cost **4 in-game credits**. Start with 8 credits; each artifact pays 4, enough for one refill. **Scavenge** gathers up to 2 free fuel per signed action, so running out of credits cannot strand you. These credits have no real-world value.
+6. **Bag the artifact** collects the current planet’s unique loot. Kepler also contains the **Nebula Reach** map (Vega and Lyra); Lyra contains the **Wild Frontier** map (Cinder and Moss). Recovered maps reveal their stars on the same chart, which expands as your known universe grows. Locked regions cannot be reached, including through direct API requests.
 7. Export signed receipts to inspect the certificate, complete signed text, and `(r,s)` signature.
 
 The dark confirmation window has stars and passing comets. Its animated hardware guide points to the physical green button (**confirm**) and labels the red button (**cancel**). **How do the buttons work?** previews this guide without sending a signing request. Decorative motion stops when the browser’s reduced-motion preference is enabled.
 
 The red button declines. **Cancel request in browser** invalidates the server challenge and sends an ID-scoped cancel command to dismiss the Wedgie prompt without signing. Reinstall the updated device app for this feature; older copies block USB inside the prompt. A response already signed cannot be recalled, so the browser discards it after cancellation. There is no signing bypass for the virtual Wedgie or a software key. An emulator may preview the app UI but cannot pass the production certificate check.
+
+The economy update preserves existing discoveries, tops the tank up once, and discards pending approvals made under the old prices. Reconnect to install device app 0.3.0, which independently checks each route’s fuel cost.
 
 Local games use process memory and disappear on restart. The Vercel deployment uses private Upstash Redis state with a two-hour idle expiry and atomic compare-and-set updates, so independent function instances cannot consume a challenge twice. Browser cookies identify the local session; returning to the same cookie resumes it and strategic actions still require the original chip.
 

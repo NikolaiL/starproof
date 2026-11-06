@@ -33,6 +33,23 @@ test('shared sessions restore across instances and atomically consume a pending 
   assert.equal(results.filter((value) => value.result).length, 1);
   assert.equal((await a.run(first.id, verifier, (session) => session.game.sequence)).result, 1);
   assert.ok(calls.some(([command]) => command === 'EVAL'));
+  const key = 'starproof:session:' + first.id;
+  const legacy = JSON.parse(records.get(key));
+  delete legacy.game.economyVersion;
+  legacy.game.fuel = 0; legacy.game.credits = 2;
+  legacy.game.claims = ['kepler']; legacy.game.maps = ['home', 'nebula'];
+  legacy.game.pending = { id: 'old-fuel-price' };
+  records.set(key, JSON.stringify(legacy));
+  const upgraded = await b.run(first.id, verifier, (session) => {
+    assert.equal(session.game.pending, null);
+    assert.equal(session.game.fuel, 8);
+    assert.equal(session.game.credits, 8);
+    session.game.fuel = 3;
+    return session.game.state();
+  });
+  assert.deepEqual(upgraded.result.claims, ['kepler']);
+  assert.deepEqual(upgraded.result.maps, ['home', 'nebula']);
+  assert.equal((await a.run(first.id, verifier, (session) => session.game.fuel)).result, 3);
   for (let i = 0; i < 9; i++) await a.run(null, verifier, () => null);
   await assert.rejects(a.run(null, verifier, () => null), /Too many new missions/);
 });

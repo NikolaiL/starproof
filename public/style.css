@@ -60,7 +60,7 @@ kbd { font: 9px/18px ui-monospace, monospace; display: inline-block; border: 1px
 .launch-sticker { background: #d7ff63; border: 3px solid #16152a; color: #171526; padding: 14px 25px; font: 100 clamp(20px, 2.4vw, 34px)/1.05 var(--display); text-align: left; transform: rotate(-8deg); box-shadow: 7px 7px 0 #141124; position: relative; }
 .launch-sticker > span { position: absolute; right: -22px; top: -35px; font: 50px sans-serif; color: #fba4ce; text-shadow: 2px 3px 0 #1a152d; }
 #map-overlay p { color: #f4eaff; background: #17152ad9; padding: 5px 8px; font-size: 11px; transform: rotate(-2deg); margin-top: 20px; }
-#destinations { display: grid; grid-template-columns: repeat(2,1fr); border-top: 1px solid var(--line); gap: 1px; background: var(--line); }
+#destinations { display: grid; grid-template-columns: repeat(auto-fit,minmax(80px,1fr)); border-top: 1px solid var(--line); gap: 1px; background: var(--line); }
 .destination-button { padding: 17px 3px; color: #bab0d9; background: #22213d; border: 0; font-size: 11px; font-weight: 900; }.destination-button.active { color: #14172a; background: var(--mint); }.destination-button:hover { box-shadow: inset 0 0 0 2px var(--purple); }
 .scan-button { position: absolute; left: 18px; bottom: 18px; border-radius: 20px; padding: 9px 12px; border: 1px solid #7b739d; color: var(--text); background: #27233ee6; font-size: 10px; font-weight: 700; }.scan-button:hover:not(:disabled) { border-color: var(--mint); color: var(--mint); }.scan-button kbd { margin-left: 8px; font-size: 7px; line-height: 13px; height: 17px; min-width: 32px; }
 .scan-readout { position: absolute; left: 18px; right: 18px; bottom: 66px; color: var(--pink); font: 10px ui-monospace, monospace; text-shadow: 0 2px 5px #000; pointer-events: none; }
@@ -77,9 +77,7 @@ footer { padding: 0 38px 25px; color: #8c82a8; display: flex; justify-content: s
 .fuel-depot { margin: 17px 0; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
 .fuel-depot > p:first-child { display: flex; justify-content: space-between; align-items: center; margin: 0 0 10px; font: 9px ui-monospace, monospace; color: var(--muted); }
 .fuel-depot strong { color: var(--mint); font-size: 20px; }.fuel-depot .button { font-size: 10px; min-height: 40px; }.fuel-depot .small-note { margin-bottom: 0; }
-.maps { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; padding: 17px 18px 0; }
-.maps button { border: 1px solid #625578; border-radius: 7px; background: #25213e; padding: 10px 4px; color: var(--muted); font-size: 9px; font-weight: 800; }
-.maps button[aria-pressed="true"] { color: #15172a; background: var(--purple); }.maps button:disabled { opacity: .55; }
+.charted-count { color: var(--purple); font: 9px ui-monospace, monospace; letter-spacing: 1px; margin: 19px 20px 0; }
 .map-hint { color: #c4badc; font: 9px/1.7 ui-monospace, monospace; margin: 12px 20px 0; }
 /* A hardware guide in Wedgie's own green / grey / red visual language. */
 dialog { color-scheme: dark; isolation: isolate; width: min(490px, calc(100vw - 28px)); max-height: calc(100dvh - 28px); padding: 0 28px 23px; border: 2px solid #51496f; border-radius: 25px; color: #faf6e8; background: radial-gradient(ellipse at 80% 35%, #39285c88, transparent 60%), #111124; text-align: center; overflow-x: hidden; box-shadow: 0 25px 140px #0009; }

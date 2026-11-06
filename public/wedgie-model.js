@@ -24,7 +24,7 @@ export async function showModel(challenge) {
   g.textAlign = 'left'; g.font = 'bold 17px monospace'; g.fillStyle = '#1a1b1a';
   g.fillText(world.name.toUpperCase(), 82, 98);
   g.font = '10px monospace';
-  const detail = action === 'claim' ? world.artifact : action === 'refuel' ? 'Fill tank: 1 jump' : world.world;
+  const detail = action === 'claim' ? world.artifact : action === 'scavenge' ? 'Gather up to 2 fuel' : action === 'refuel' ? 'Fill tank: 8 fuel' : world.world;
   g.fillText(detail, 82, 117);
   g.fillText(document.getElementById('device-cost').textContent, 82, 136);
   g.textAlign = 'center'; g.font = '9px monospace'; g.fillStyle = '#787b78'; g.fillText('REVIEW YOUR REAL DEVICE', 120, 168);

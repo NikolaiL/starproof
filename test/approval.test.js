@@ -26,9 +26,9 @@ test('the button guide sends no request; real approvals show the action and boun
   closeApproval();
   assert.equal(element('approval').open, false);
 
-  openApproval({ action: 'jump', target: 'vega', expires: now / 1000 + 90 });
+  openApproval({ action: 'jump', target: 'vega', cost: 4, expires: now / 1000 + 90 });
   assert.equal(element('approval-action').textContent, 'Jump to Vega');
-  assert.equal(element('device-cost').textContent, 'Fuel: 1');
+  assert.equal(element('device-cost').textContent, 'Fuel: 4');
   assert.equal(element('approval-countdown').textContent, '60s to respond');
   now += 61_000; tick();
   assert.equal(element('approval-countdown').textContent, 'Request expired');
@@ -47,15 +47,15 @@ test('the button guide sends no request; real approvals show the action and boun
   closeApproval();
   assert.equal(activeTimer, false);
 
-  openApproval({ action: 'refuel', target: 'kepler', cost: 3, expires: now / 1000 + 20 });
+  openApproval({ action: 'refuel', target: 'kepler', cost: 4, expires: now / 1000 + 20 });
   assert.equal(element('device-question').textContent, 'Refuel tank?');
-  assert.equal(element('device-cost').textContent, '3 credits');
-  assert.match(element('approval-action').textContent, /Refuel at Kepler · 3 credits/);
+  assert.equal(element('device-cost').textContent, '4 credits');
+  assert.match(element('approval-action').textContent, /Refuel at Kepler · 4 credits/);
   closeApproval();
   openApproval({ action: 'refuel', target: 'kepler', cost: 0, expires: now / 1000 + 20 });
   assert.equal(element('device-cost').textContent, 'Free fuel cache');
   closeApproval();
-  openInstall('0.2.0', 'https://github.com/NikolaiL/wedgie-starproof');
+  openInstall('0.3.0', 'https://github.com/NikolaiL/wedgie-starproof');
   assert.equal(element('cancel').disabled, true);
   assert.match(element('approval-description').textContent, /FULL CONTROL/);
   installProgress(.5, 'starproof.py');

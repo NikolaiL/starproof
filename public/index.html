@@ -25,8 +25,8 @@
         <div class="panel-title"><span>01 / FLIGHT CONSOLE</span><span class="live-dot"></span></div>
         <div class="ship-emblem" aria-hidden="true"><svg viewBox="0 0 180 110"><g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M90 12 108 63 146 85 112 85 101 75 90 94 79 75 68 85 34 85 72 63Z"/><path d="m90 12 0 82M72 63l18 9 18-9M82 51h16M79 75l11-19 11 19"/><circle cx="90" cy="61" r="47" stroke-dasharray="2 7" opacity=".35"/></g></svg></div>
         <p class="eyebrow ship-label">YOUR TRUSTY SPACE BUCKET</p><h2>Wayfarer <span>01</span></h2>
-        <div class="ship-stats"><div><span>JUMP FUEL</span><strong id="fuel">01 <small>/ 01</small></strong></div><div><span>ARTIFACTS</span><strong id="artifact-count">00 <small>/ 06</small></strong></div></div>
-        <div class="fuel-depot"><p><span>SPACE CREDITS</span><strong id="credits">6</strong></p><button id="refuel" class="button full" disabled>Refuel at Sol</button><p id="fuel-hint" class="small-note">One jump per tank. A free cache on each planet, then 3 credits per refill.</p></div>
+        <div class="ship-stats"><div><span>JUMP FUEL</span><strong id="fuel">08 <small>/ 08</small></strong></div><div><span>ARTIFACTS</span><strong id="artifact-count">00 <small>/ 06</small></strong></div></div>
+        <div class="fuel-depot"><p><span>SPACE CREDITS</span><strong id="credits">8</strong></p><button id="refuel" class="button full" disabled>Refuel at Sol</button><button id="scavenge" class="text-button" disabled>Scavenge +2 fuel</button><p id="fuel-hint" class="small-note">An 8-unit tank. Jumps cost 2–8 fuel by distance.</p></div>
         <div class="device-card"><span class="eyebrow">SIGNING DEVICE</span><p id="device-status">No Wedgie connected</p><span id="device-detail">Your factory key stays on the chip.</span><p class="first-run">First run? Review the code below. Connect installs Starproof if needed; approve on your Wedgie.</p><a class="source-link" href="https://github.com/NikolaiL/wedgie-starproof/tree/main/device" target="_blank" rel="noreferrer">Review device code on GitHub ↗</a><a class="source-link" href="https://github.com/NikolaiL/wedgie-starproof#install-through-wedgiedev" target="_blank" rel="noreferrer">Installation guide ↗</a></div>
         <button id="launch" class="button primary full">Let’s launch <span>↗</span></button>
         <p id="mission-hint" class="small-note">A real Trust M signature is required to leave Sol.</p>
@@ -35,7 +35,7 @@
 
       <section class="chart" aria-label="Star map">
         <div class="chart-toolbar"><div><span class="eyebrow">NAVIGATION CHART</span><h2 id="chart-title">Pick your kind of weird.</h2></div><span id="location-tag" class="tag">SOL SYSTEM</span></div>
-        <nav id="maps" class="maps" aria-label="Recovered star maps"></nav><p id="map-hint" class="map-hint"></p>
+        <p id="charted-count" class="charted-count">2 / 6 STARS CHARTED</p><p id="map-hint" class="map-hint"></p>
         <div class="canvas-wrap"><canvas id="space" tabindex="0" aria-label="Interactive star map. Use the destination buttons below to select a star system, then authorize a jump."></canvas><div id="map-overlay"><span class="launch-sticker">NEXT STOP:<br>THE UNKNOWN <span aria-hidden="true">↗</span></span><p>One signature. A whole lot of space.</p></div><button id="scan" class="scan-button" disabled>◎ Send a sonar ping <kbd>SPACE</kbd></button><div id="scan-readout" class="scan-readout" role="status" aria-live="polite"></div></div>
         <nav id="destinations" aria-label="Select a destination"></nav>
       </section>

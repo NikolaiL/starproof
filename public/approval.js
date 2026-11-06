@@ -10,10 +10,10 @@ export function openApproval(challenge, preview = false) {
   $('approval').dataset.phase = preview ? 'preview' : 'waiting';
   $('approval-title').textContent = 'Press the green button.';
   $('approval-description').textContent = preview ? 'On your physical Wedgie. Red says no.' : 'Check the action on your Wedgie, then confirm on the device.';
-  $('approval-action').textContent = action === 'launch' ? 'Launch your expedition' : action === 'jump' ? 'Jump to ' + destination.name : action === 'refuel' ? 'Refuel at ' + destination.name + (cost ? ' · ' + cost + ' credits' : ' · free cache') : 'Claim ' + destination.artifact;
-  $('device-question').textContent = action === 'launch' ? 'Launch mission?' : action === 'jump' ? 'Commit jump?' : action === 'refuel' ? 'Refuel tank?' : 'Claim artifact?';
-  $('device-target').textContent = action === 'launch' ? 'SOL' : action === 'jump' ? destination.name.toUpperCase() : action === 'refuel' ? destination.name.toUpperCase() : destination.artifact;
-  $('device-cost').textContent = action === 'refuel' ? (cost ? cost + ' credits' : 'Free fuel cache') : action === 'jump' ? 'Fuel: 1' : 'Fuel: 0';
+  $('approval-action').textContent = action === 'launch' ? 'Launch your expedition' : action === 'jump' ? 'Jump to ' + destination.name : action === 'scavenge' ? 'Scavenge up to 2 fuel at ' + destination.name : action === 'refuel' ? 'Refuel at ' + destination.name + (cost ? ' · ' + cost + ' credits' : ' · free cache') : 'Claim ' + destination.artifact;
+  $('device-question').textContent = action === 'launch' ? 'Launch mission?' : action === 'jump' ? 'Commit jump?' : action === 'scavenge' ? 'Gather fuel?' : action === 'refuel' ? 'Refuel tank?' : 'Claim artifact?';
+  $('device-target').textContent = action === 'launch' ? 'SOL' : action === 'jump' ? destination.name.toUpperCase() : ['refuel', 'scavenge'].includes(action) ? destination.name.toUpperCase() : destination.artifact;
+  $('device-cost').textContent = action === 'scavenge' ? 'Free · up to 2 fuel' : action === 'refuel' ? (cost ? cost + ' credits' : 'Free fuel cache') : action === 'jump' ? 'Fuel: ' + cost : 'Fuel: 0';
   $('approval-status').textContent = preview ? 'BUTTON GUIDE · NO REQUEST SENT' : 'WAITING FOR YOUR BUTTON PRESS';
   $('cancel').textContent = preview ? 'Got it' : 'Cancel request in browser';
   $('cancel').disabled = false;
