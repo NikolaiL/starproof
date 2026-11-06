@@ -1,6 +1,7 @@
 import { WedgieSigner } from './sdk.js';
 import { SECTORS, MAPS, MAX_FUEL, START_CREDITS, SCAVENGE_FUEL, jumpCost, DEVICE_VERSION, sector, PROTOCOL, chartedWorlds, chartBounds } from './protocol.js';
 import { drawPlanet, drawMonster, drawShip } from './graphics.js';
+import { mapPoint, planetAction } from './navigation.js';
 import { openApproval, showVerifying, closeApproval, openInstall, installProgress } from './approval.js';
 import { showModel, stopModelPress, closeModel } from './wedgie-model.js';
 
@@ -10,10 +11,11 @@ const signer = new WedgieSigner('starproof');
 let state = { started: false, location: 'sol', fuel: MAX_FUEL, credits: START_CREDITS, maps: ['home'], refuelCost: 0, claims: [], receipts: [], sequence: 0 };
 let view = chartBounds(chartedWorlds(state.maps)), viewTarget = view;
 let selected = 'kepler', busy = false, deviceReady = false, cancelled = false;
-let ship = { x: 0.23, y: 0.54 }, scanned = new Set(), noticeTimer;
+let ship = { x: 0.23, y: 0.54 }, noticeTimer;
 let ping = null;
 let cancellation;
 const keys = new Set();
+const planetNodes = new Map();
 const canvas = $('space'), ctx = canvas.getContext('2d');
 const portrait = $('planet'), portraitContext = portrait.getContext('2d');
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -30,22 +32,31 @@ function visibleWorlds() { return chartedWorlds(state.maps); }
 function dock() { const here = sector(state.location); ship = { x: here.x, y: here.y }; }
 
 for (const star of SECTORS) {
-  const button = document.createElement('button'); button.type = 'button'; button.className = 'destination-button';
-  button.textContent = '✧ ' + star.name.toUpperCase(); button.dataset.id = star.id;
-  button.addEventListener('click', () => select(star.id)); $('destinations').append(button);
+  const node = document.createElement('div'); node.className = 'planet-node'; node.dataset.id = star.id;
+  node.style.setProperty('--planet-color', star.color);
+  const name = document.createElement('button'); name.type = 'button'; name.className = 'planet-name'; name.textContent = star.name;
+  name.addEventListener('click', () => select(star.id));
+  const status = document.createElement('span'); status.className = 'planet-loot';
+  const action = document.createElement('button'); action.type = 'button'; action.className = 'planet-action';
+  action.addEventListener('click', () => { select(star.id); void commit(planetAction(state, star.id, deviceReady, busy).action, star.id); });
+  node.append(name, status, action); $('destinations').append(node);
+  planetNodes.set(star.id, { node, name, status, action });
 }
 
 function render() {
   if (!state.maps.includes(sector(selected).map)) selected = state.location;
   viewTarget = chartBounds(visibleWorlds());
+  canvas.parentElement.dataset.worlds = visibleWorlds().length;
   const destination = sector(selected), here = selected === state.location;
   $('fuel').replaceChildren(document.createTextNode(String(state.fuel).padStart(2, '0') + ' '), Object.assign(document.createElement('small'), { textContent: '/ 0' + MAX_FUEL }));
   $('artifact-count').replaceChildren(document.createTextNode(String(state.claims.length).padStart(2, '0') + ' '), Object.assign(document.createElement('small'), { textContent: '/ 0' + SECTORS.length }));
   $('credits').textContent = state.credits;
-  $('refuel').textContent = state.refuelCost ? 'Buy fuel · ' + state.refuelCost + ' credits' : 'Refuel · free planet cache';
+  $('fuel-meter').value = state.fuel;
+  $('fuel-meter').setAttribute('aria-valuetext', state.fuel + ' of ' + MAX_FUEL + ' fuel');
+  $('refuel').textContent = state.refuelCost ? 'Refuel · ' + state.refuelCost + ' credits' : 'Refuel · free cache';
   $('refuel').disabled = busy || !deviceReady || !state.started || state.fuel >= MAX_FUEL || state.credits < state.refuelCost;
-  $('fuel-hint').textContent = 'Jumps cost 2–8 fuel by distance. ' + (state.refuelCost ? 'A full refill costs ' + state.refuelCost + ' credits. Scavenge if you are short.' : 'A free full-tank cache is waiting at ' + sector(state.location).name + '.');
-  $('scavenge').textContent = 'Scavenge up to ' + SCAVENGE_FUEL + ' fuel';
+  $('fuel-hint').textContent = state.started ? (state.refuelCost ? 'Jumps use 2–8 fuel. Refill for ' + state.refuelCost + ' credits, or scavenge for free.' : 'Free full-tank cache at ' + sector(state.location).name + '. Jumps use 2–8 fuel.') : 'Approve launch on your Wedgie. Then collect artifacts to chart new stars.';
+  $('scavenge').textContent = 'Scavenge +' + SCAVENGE_FUEL + ' fuel';
   $('scavenge').disabled = busy || !deviceReady || !state.started || state.fuel >= MAX_FUEL;
   const found = MAPS.find((map) => map.foundAt === selected);
   $('loot-note').textContent = state.claims.includes(selected) ? 'Artifact recovered. This planet’s loot is yours.' : 'Artifact loot: +4 credits' + (found ? ' + ' + found.name + ' star map.' : '.');
@@ -53,29 +64,43 @@ function render() {
   const next = MAPS.find((map) => !state.maps.includes(map.id));
   $('map-hint').textContent = next ? 'Recover the artifact on ' + sector(next.foundAt).name + ' to chart the next stars.' : 'Every star is charted. The whole universe is on this map.';
   $('destination-name').textContent = destination.name;
+  $('report-name').textContent = destination.name;
   $('destination-description').textContent = destination.description;
-  $('world-type').textContent = here ? 'CURRENT SYSTEM' : 'UNEXPLORED SYSTEM';
+  $('world-type').textContent = here ? 'Current system' : 'Selected system';
   $('landmark').textContent = destination.world;
-  $('destination-state').textContent = state.claims.includes(selected) ? 'Artifact secured' : here && state.started ? 'In range' : 'Uncharted';
+  $('destination-state').textContent = state.claims.includes(selected) ? 'Artifact secured' : here && state.started ? 'Ready to collect' : 'Artifact available';
   $('jump-cost').textContent = here ? '—' : jumpCost(state.location, selected) + ' fuel';
   $('resident-name').textContent = destination.resident || 'Clear skies. For now.';
   $('resident-note').textContent = destination.residentNote || 'A peaceful place to stretch your space legs.';
   $('resident-card').classList.toggle('has-monster', !!destination.monster);
   $('location-tag').textContent = sector(state.location).name.toUpperCase() + ' SYSTEM';
-  $('chart-title').textContent = 'The growing unknown.';
   $('map-overlay').hidden = state.started;
   $('launch').hidden = state.started;
   $('launch').disabled = busy || !deviceReady;
-  $('jump').disabled = busy || !deviceReady || !state.started || here || state.fuel < jumpCost(state.location, selected);
-  $('claim').disabled = busy || !deviceReady || !state.started || !here || state.claims.includes(selected);
+  $('refuel').hidden = !state.started;
+  $('scavenge').hidden = !state.started;
+  $('scan').hidden = !state.started;
   $('connect').disabled = busy;
   $('signing-help').disabled = busy;
   $('scan').disabled = !state.started || busy;
   $('connect').textContent = signer.port && deviceReady ? 'Disconnect ↗' : 'Connect Wedgie ↗';
-  $('mission-hint').textContent = state.started ? 'Sign jumps and refills. Recover artifacts to find more maps.' : 'A real Trust M signature is required to leave Sol.';
+  $('dock-location').textContent = (state.started ? 'Docked at ' : 'Ready at ') + sector(state.location).name;
+  $('mission-hint').textContent = !deviceReady ? 'Connect your Wedgie to ' + (state.started ? 'continue.' : 'launch.') : state.started ? 'Pick a planet. Sign the big decisions.' : 'Your chip is ready. Launch your expedition.';
   $('trust-status').textContent = state.started ? 'TRUST M SIGNATURE VERIFIED' : 'AWAITING LAUNCH';
   $('trust-status').className = 'status' + (state.started ? ' verified' : '');
-  for (const button of $('destinations').children) { button.hidden = !state.maps.includes(sector(button.dataset.id).map); button.classList.toggle('active', button.dataset.id === selected); button.setAttribute('aria-pressed', String(button.dataset.id === selected)); }
+  for (const [id, { node, name, status, action }] of planetNodes) {
+    node.hidden = !state.maps.includes(sector(id).map);
+    node.classList.toggle('active', id === selected);
+    node.classList.toggle('is-here', id === state.location);
+    node.classList.toggle('is-collected', state.claims.includes(id));
+    name.setAttribute('aria-pressed', String(id === selected));
+    name.setAttribute('aria-label', 'Inspect ' + sector(id).name + (id === state.location ? ', current system' : ''));
+    const control = planetAction(state, id, deviceReady, busy);
+    status.textContent = (id === state.location ? 'Here · ' : state.claims.includes(id) ? '✓ ' : '◇ ') + control.status;
+    action.textContent = control.text; action.disabled = control.disabled;
+    action.setAttribute('aria-label', control.text + ' at ' + sector(id).name);
+    action.title = !deviceReady ? 'Connect your Wedgie first' : !state.started ? 'Launch your expedition first' : control.text;
+  }
   $('export').disabled = state.receipts.length === 0;
   if (state.receipts.length) {
     $('receipts').replaceChildren(...state.receipts.map((receipt) => {
@@ -138,7 +163,7 @@ async function commit(action, target) {
     selected = state.location;
     const found = MAPS.find((map) => map.foundAt === target);
     notice(action === 'launch' ? 'Signature verified. The stars are yours.' : action === 'jump' ? 'Jump committed. Welcome to ' + sector(target).name + '. ' + state.fuel + ' fuel left.' : action === 'refuel' ? 'Tank filled to 8 fuel. Plan your next route.' : action === 'scavenge' ? 'Fuel gathered. You now have ' + state.fuel + ' / 8 fuel.' : sector(target).artifact + ' secured. +4 credits.' + (found ? ' Found the ' + found.name + ' star map!' : ''));
-    canvas.focus();
+    canvas.focus({ preventScroll: true });
   } catch (error) {
     if (!cancelled) notice(error.message);
     if (challenge) await api('cancel', {}).catch(() => {});
@@ -149,8 +174,6 @@ async function commit(action, target) {
   } finally { if (cancellation) await cancellation; closeModel(); closeApproval(); busy = false; render(); }
 }
 $('launch').addEventListener('click', () => commit('launch', 'sol'));
-$('jump').addEventListener('click', () => commit('jump', selected));
-$('claim').addEventListener('click', () => commit('claim', selected));
 $('refuel').addEventListener('click', () => commit('refuel', state.location));
 $('scavenge').addEventListener('click', () => commit('scavenge', state.location));
 async function cancel() {
@@ -185,14 +208,14 @@ function scan() {
   if (!state.started || busy) return;
   let nearest = visibleWorlds()[0];
   for (const star of visibleWorlds()) if (Math.hypot(ship.x - star.x, ship.y - star.y) < Math.hypot(ship.x - nearest.x, ship.y - nearest.y)) nearest = star;
-  scanned.add(nearest.id); select(nearest.id);
+  select(nearest.id);
   ping = { at: performance.now(), x: ship.x, y: ship.y, target: nearest.id };
   $('scan-readout').textContent = nearest.monster ? nearest.resident + ': “' + nearest.greeting + '”' : nearest.world + ': clear skies. Keep exploring.';
   notice(nearest.monster ? nearest.resident + ' heard your ping. ' + nearest.greeting : 'Signal: ' + nearest.world + '. ' + nearest.description);
 }
 $('scan').addEventListener('click', scan);
 addEventListener('keydown', (event) => {
-  if (event.target.closest('button, input, textarea, select') || $('approval').open || event.metaKey || event.ctrlKey || event.altKey) return;
+  if (event.target !== canvas || $('approval').open || event.metaKey || event.ctrlKey || event.altKey) return;
   // event.code ignores Shift/Caps Lock, so a keyup always matches its keydown.
   if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(event.code)) {
     event.preventDefault(); keys.add(event.code);
@@ -201,10 +224,13 @@ addEventListener('keydown', (event) => {
 });
 addEventListener('keyup', (event) => keys.delete(event.code));
 addEventListener('blur', () => keys.clear());
+canvas.addEventListener('blur', () => keys.clear());
 canvas.addEventListener('click', (event) => {
   const box = canvas.getBoundingClientRect(), x = (event.clientX - box.left) / box.width, y = (event.clientY - box.top) / box.height;
-  const distance = (star) => Math.hypot(((star.x - view.left) / view.width - x) * box.width, ((star.y - view.top) / view.height - y) * box.height);
-  const nearest = visibleWorlds().sort((a, b) => distance(a) - distance(b))[0]; select(nearest.id); canvas.focus();
+  const distance = (star) => { const p = mapPoint(star, view, box.width, box.height); return Math.hypot(p.x - x * box.width, p.y - y * box.height); };
+  const nearest = visibleWorlds().sort((a, b) => distance(a) - distance(b))[0];
+  if (distance(nearest) < 65) select(nearest.id);
+  canvas.focus({ preventScroll: true });
 });
 // Procedural art keeps the scene local and makes each planet's resident react to sonar.
 const stars = Array.from({ length: 125 }, (_, i) => ({ x: ((i * 137.508) % 997) / 997, y: ((i * 83.17 + 31) % 991) / 991, r: i % 11 === 0 ? 1.8 : .7 }));
@@ -216,13 +242,15 @@ function frame(time) {
   if (canvas.width !== Math.round(box.width * dpr) || canvas.height !== Math.round(box.height * dpr)) { canvas.width = Math.round(box.width * dpr); canvas.height = Math.round(box.height * dpr); }
   const w = box.width, h = box.height; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h);
   for (const key of ['left', 'top', 'width', 'height']) view[key] += (viewTarget[key] - view[key]) * (reducedMotion ? 1 : Math.min(1, dt * 4));
-  const point = (object) => ({ x: (object.x - view.left) / view.width * w, y: (object.y - view.top) / view.height * h });
+  const point = (object) => mapPoint(object, view, w, h);
   const moving = state.started && !busy && !$('approval').open && ['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].some((key) => keys.has(key));
   if (state.started && !busy && !$('approval').open) {
-    ship.x += ((keys.has('KeyD') || keys.has('ArrowRight') ? 1 : 0) - (keys.has('KeyA') || keys.has('ArrowLeft') ? 1 : 0)) * dt * .18 * view.width;
-    ship.y += ((keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0) - (keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0)) * dt * .18 * view.height;
-    ship.x = Math.max(viewTarget.left + viewTarget.width * .05, Math.min(viewTarget.left + viewTarget.width * .95, ship.x));
-    ship.y = Math.max(viewTarget.top + viewTarget.height * .08, Math.min(viewTarget.top + viewTarget.height * .89, ship.y));
+    const dx = (keys.has('KeyD') || keys.has('ArrowRight') ? 1 : 0) - (keys.has('KeyA') || keys.has('ArrowLeft') ? 1 : 0);
+    const dy = (keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0) - (keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0);
+    ship.x += (w < 760 ? dy : dx) * dt * .18 * view.width;
+    ship.y += (w < 760 ? dx : dy) * dt * .18 * view.height;
+    ship.x = Math.max(viewTarget.left + (w < 760 ? .6 : viewTarget.width * .05), Math.min(viewTarget.left + viewTarget.width - (w < 760 ? .6 : viewTarget.width * .05), ship.x));
+    ship.y = Math.max(viewTarget.top + (w < 760 ? .65 : viewTarget.height * .08), Math.min(viewTarget.top + viewTarget.height - (w < 760 ? .7 : viewTarget.height * .11), ship.y));
   }
   ctx.strokeStyle = '#a294fa0c'; ctx.lineWidth = 1;
   for (let x = 0; x < w; x += 55) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
@@ -250,28 +278,27 @@ function frame(time) {
   }
   for (const star of visibleWorlds()) {
     const { x, y } = point(star), active = star.id === selected;
-    const compact = w < 450 && visibleWorlds().length > 4, size = compact ? .75 : 1;
+    const size = w < 760 ? .85 : 1.2;
+    const node = planetNodes.get(star.id).node;
+    node.style.transform = `translate(${x}px, ${y + (w < 760 ? 24 : 37 * size)}px) translateX(-50%)`;
     ctx.strokeStyle = active ? '#deff6266' : '#a294fa20'; ctx.lineWidth = active ? 2 : 1; ctx.setLineDash(active ? [3, 7] : []);
     ctx.beginPath(); ctx.ellipse(x, y, (active ? 46 : 34) * size, (active ? 46 : 34) * size, 0, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
     drawPlanet(ctx, star, x, y, (active ? 23 : 17) * size, artTime);
-    const labelY = y > h * .68 ? y - 48 * size : y + 48 * size;
-    ctx.font = '900 ' + (compact ? 12 : 15) + 'px "Arial Black", sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 4; ctx.strokeStyle = '#101124';
-    ctx.strokeText(star.name.toUpperCase(), x, labelY); ctx.fillStyle = active ? '#efffc9' : '#beb9dc'; ctx.fillText(star.name.toUpperCase(), x, labelY);
-    ctx.font = 'bold 8px ui-monospace, monospace';
-    if (state.claims.includes(star.id)) { ctx.fillStyle = '#d7ff63'; ctx.fillText('★ ARTIFACT SECURED', x, labelY + 14); }
-    else if (scanned.has(star.id)) { ctx.fillStyle = '#a5a4c2'; ctx.fillText('SIGNAL FOUND', x, labelY + 14); }
     if (star.monster) {
-      const mx = x + (x > w * .72 ? -47 : 47) * size, my = y - 30 * size, startled = pingAge < 3.5 && ping.target === star.id;
-      drawMonster(ctx, star.monster, mx, my, (active ? 27 : 21) * size, artTime, startled);
+      const mx = x + (w < 760 && x < w / 2 ? -23 : 23) * size, my = y - 13 * size, startled = pingAge < 3.5 && ping.target === star.id;
+      ctx.strokeStyle = star.color + '88'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.ellipse(x, y, 34 * size, 26 * size, -.5, 0, Math.PI * 2); ctx.stroke();
+      drawMonster(ctx, star.monster, mx, my, (active ? 24 : 21) * size, artTime, startled);
       if (startled) {
+        ctx.textAlign = 'center';
         ctx.font = '900 10px "Arial Black", sans-serif'; ctx.fillStyle = '#fff9e8'; ctx.beginPath(); ctx.roundRect(mx - 39, my - 58, 78, 22, 6); ctx.fill(); ctx.fillStyle = '#18152e'; ctx.fillText(star.monster === 'jelly' ? 'BLORP!' : 'SNACK?!', mx, my - 43);
       }
     }
   }
-  if (state.started) drawShip(ctx, point(ship).x, point(ship).y - 25, artTime, moving && !reducedMotion);
+  if (state.started) drawShip(ctx, point(ship).x - 20, point(ship).y - 30, artTime, moving && !reducedMotion);
   portraitContext.clearRect(0, 0, 300, 225);
   drawPlanet(portraitContext, destination, 135, 136, 68, artTime);
-  if (destination.monster) drawMonster(portraitContext, destination.monster, 213, 99, 65, artTime, pingAge < 3.5 && ping.target === destination.id);
+  if (destination.monster) drawMonster(portraitContext, destination.monster, 184, 105, 48, artTime, pingAge < 3.5 && ping.target === destination.id);
   else {
     portraitContext.strokeStyle = '#fff9e870'; portraitContext.lineWidth = 2; portraitContext.setLineDash([3, 8]);
     portraitContext.beginPath(); portraitContext.ellipse(143, 126, 112, 44, -.4, 0, Math.PI * 2); portraitContext.stroke(); portraitContext.setLineDash([]);
@@ -280,5 +307,10 @@ function frame(time) {
   requestAnimationFrame(frame);
 }
 render(); requestAnimationFrame(frame);
-try { state = await api('state'); dock(); render(); }
+try {
+  state = await api('state'); dock();
+  if (state.started) selected = state.location;
+  view = chartBounds(visibleWorlds());
+  render();
+}
 catch (error) { notice(error.message); }

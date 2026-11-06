@@ -10,48 +10,38 @@
 </head>
 <body>
   <header>
-    <a class="brand" href="/" aria-label="Starproof home"><span class="brandmark">✳</span> STARPROOF<span class="edition">ODD LITTLE SPACE ADVENTURE</span></a>
-    <div class="header-right"><span id="trust-status" class="status">AWAITING LAUNCH</span><button id="connect" class="button compact">Connect Wedgie <span>↗</span></button></div>
+    <a class="brand" href="/" aria-label="Starproof home"><span class="brandmark" aria-hidden="true">✳</span> STARPROOF</a>
+    <span class="header-caption">An odd little space adventure</span>
+    <div class="header-right"><button id="connect" class="button compact">Connect Wedgie ↗</button></div>
   </header>
   <main>
-    <section class="intro">
-      <div><p class="eyebrow">REAL CHIP. UNREAL UNIVERSE.</p><h1>SPACE GETS<br><em>WEIRD.</em><span class="title-spark" aria-hidden="true">✳</span></h1></div>
-      <div class="intro-copy"><span class="comic-stamp">YOU ARE THE CAPTAIN.</span><p>Meet questionable lifeforms.<br> Collect impossible things.<br> Sign the big decisions.</p><p class="signature-rule"><span class="dot"></span> LAUNCH · JUMP · REFUEL · CLAIM</p></div>
-      <div class="coordinates">EST. 2026<br>PROBABLY HABITABLE.<br>DEFINITELY WEIRD.</div>
+    <section class="resource-bar" aria-label="Ship resources">
+      <div class="resource fuel-resource"><span class="resource-icon" aria-hidden="true">◒</span><div><span>Jump fuel</span><strong id="fuel">08 <small>/ 08</small></strong></div><meter id="fuel-meter" min="0" max="8" value="8" aria-label="Fuel remaining">8 of 8</meter></div>
+      <div class="resource"><span class="resource-icon" aria-hidden="true">✦</span><div><span>Credits</span><strong id="credits">8</strong></div></div>
+      <div class="resource"><span class="resource-icon" aria-hidden="true">◇</span><div><span>Artifacts collected</span><strong id="artifact-count">00 <small>/ 06</small></strong></div></div>
+      <div class="flight-status"><span id="trust-status" class="status">AWAITING LAUNCH</span><span id="location-tag" class="tag">SOL SYSTEM</span></div>
     </section>
 
-    <div class="workspace">
-      <aside class="console" aria-label="Mission controls">
-        <div class="panel-title"><span>01 / FLIGHT CONSOLE</span><span class="live-dot"></span></div>
-        <div class="ship-emblem" aria-hidden="true"><svg viewBox="0 0 180 110"><g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M90 12 108 63 146 85 112 85 101 75 90 94 79 75 68 85 34 85 72 63Z"/><path d="m90 12 0 82M72 63l18 9 18-9M82 51h16M79 75l11-19 11 19"/><circle cx="90" cy="61" r="47" stroke-dasharray="2 7" opacity=".35"/></g></svg></div>
-        <p class="eyebrow ship-label">YOUR TRUSTY SPACE BUCKET</p><h2>Wayfarer <span>01</span></h2>
-        <div class="ship-stats"><div><span>JUMP FUEL</span><strong id="fuel">08 <small>/ 08</small></strong></div><div><span>ARTIFACTS</span><strong id="artifact-count">00 <small>/ 06</small></strong></div></div>
-        <div class="fuel-depot"><p><span>SPACE CREDITS</span><strong id="credits">8</strong></p><button id="refuel" class="button full" disabled>Refuel at Sol</button><button id="scavenge" class="text-button" disabled>Scavenge +2 fuel</button><p id="fuel-hint" class="small-note">An 8-unit tank. Jumps cost 2–8 fuel by distance.</p></div>
-        <div class="device-card"><span class="eyebrow">SIGNING DEVICE</span><p id="device-status">No Wedgie connected</p><span id="device-detail">Your factory key stays on the chip.</span><p class="first-run">First run? Review the code below. Connect installs Starproof if needed; approve on your Wedgie.</p><a class="source-link" href="https://github.com/NikolaiL/wedgie-starproof/tree/main/device" target="_blank" rel="noreferrer">Review device code on GitHub ↗</a><a class="source-link" href="https://github.com/NikolaiL/wedgie-starproof#install-through-wedgiedev" target="_blank" rel="noreferrer">Installation guide ↗</a></div>
-        <button id="launch" class="button primary full">Let’s launch <span>↗</span></button>
-        <p id="mission-hint" class="small-note">A real Trust M signature is required to leave Sol.</p>
-        <button id="signing-help" class="text-button">How do the buttons work? ↗</button><div class="controls-note"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><span>or arrows to fly</span><br><kbd>SPACE</kbd><span>scan nearby signals</span><p>Flying, scanning and inspecting the map never ask for a signature.</p></div>
-      </aside>
+    <section class="chart" aria-label="Star map">
+      <div class="chart-toolbar"><div><h1 id="chart-title">Space gets weird.</h1><p id="map-hint" class="map-hint">Recover artifacts to expand your star chart.</p></div><span id="charted-count" class="charted-count">2 / 6 STARS CHARTED</span></div>
+      <div class="canvas-wrap">
+        <canvas id="space" tabindex="0" aria-label="Interactive star map. Select a planet or use its buttons to travel and recover artifacts."></canvas>
+        <nav id="destinations" aria-label="Planet actions"></nav>
+        <div id="map-overlay"><span class="launch-sticker">Small ship.<br>Big weird universe.</span><p>Connect your Wedgie, then launch below.</p></div>
+        <div id="scan-readout" class="scan-readout" role="status" aria-live="polite"></div>
+      </div>
+      <div class="mission-dock" aria-label="Flight controls">
+        <div class="mission-summary"><span class="live-dot" aria-hidden="true"></span><div><strong id="dock-location">Docked at Sol</strong><p id="mission-hint">Connect a Wedgie to launch your expedition.</p></div></div>
+        <div class="dock-actions"><button id="launch" class="button primary">Launch expedition ↗</button><button id="refuel" class="button" disabled>Refuel · free cache</button><button id="scavenge" class="button subtle" disabled>Scavenge +2 fuel</button><button id="scan" class="button subtle" disabled>◎ Scan <kbd>SPACE</kbd></button></div>
+      </div>
+      <div class="map-caption"><span id="fuel-hint">Jumps cost 2–8 fuel by distance.</span><span class="keyboard-hint">Click map · WASD / arrows to fly · Space to scan</span></div>
+    </section>
 
-      <section class="chart" aria-label="Star map">
-        <div class="chart-toolbar"><div><span class="eyebrow">NAVIGATION CHART</span><h2 id="chart-title">Pick your kind of weird.</h2></div><span id="location-tag" class="tag">SOL SYSTEM</span></div>
-        <p id="charted-count" class="charted-count">2 / 6 STARS CHARTED</p><p id="map-hint" class="map-hint"></p>
-        <div class="canvas-wrap"><canvas id="space" tabindex="0" aria-label="Interactive star map. Use the destination buttons below to select a star system, then authorize a jump."></canvas><div id="map-overlay"><span class="launch-sticker">NEXT STOP:<br>THE UNKNOWN <span aria-hidden="true">↗</span></span><p>One signature. A whole lot of space.</p></div><button id="scan" class="scan-button" disabled>◎ Send a sonar ping <kbd>SPACE</kbd></button><div id="scan-readout" class="scan-readout" role="status" aria-live="polite"></div></div>
-        <nav id="destinations" aria-label="Select a destination"></nav>
-      </section>
-
-      <aside class="destination" aria-label="Selected destination">
-        <div class="panel-title"><span>02 / DESTINATION</span><span>↗</span></div>
-        <div class="planet-stage"><canvas id="planet" width="300" height="225" aria-hidden="true"></canvas><span class="portrait-sticker" aria-hidden="true">SAY HELLO.</span></div>
-        <p id="world-type" class="eyebrow">HOME SYSTEM</p><h2 id="destination-name">Sol</h2><p id="destination-description" class="description">Home signal. The last familiar light.</p>
-        <div id="resident-card" class="resident-card"><span class="eyebrow">LOCAL LIFEFORM</span><h3 id="resident-name">Clear skies</h3><p id="resident-note">No monsters. Yet.</p></div><dl class="destination-facts"><div><dt>LANDMARK</dt><dd id="landmark">Luna</dd></div><div><dt>STATUS</dt><dd id="destination-state">Unexplored</dd></div><div><dt>JUMP COST</dt><dd id="jump-cost">—</dd></div></dl>
-        <button id="jump" class="button full">Jump here <span>↗</span></button>
-        <button id="claim" class="button full subtle">Bag the artifact <span>＋</span></button>
-        <p id="loot-note" class="small-note">These decisions ask for the green button on your Wedgie.</p>
-      </aside>
+    <section class="flight-log" aria-labelledby="diary-title"><div class="log-heading"><div><p class="eyebrow">Expedition record</p><h2 id="diary-title">The captain’s diary.</h2></div><button id="export" class="text-button" disabled>Export signed receipts ↗</button></div><ol id="receipts" tabindex="0" aria-label="Signed flight receipts"><li class="empty-log"><span>—</span>Your first adventure is one green button away.</li></ol></section>
+    <div class="field-notes">
+      <details class="planet-report" open><summary>Selected planet <span id="report-name">Kepler</span></summary><div class="report-body"><canvas id="planet" width="300" height="225" aria-hidden="true"></canvas><div><p id="world-type" class="eyebrow">Unexplored system</p><h2 id="destination-name">Kepler</h2><p id="destination-description" class="description"></p><p id="loot-note" class="small-note"></p><div id="resident-card" class="resident-card"><strong id="resident-name"></strong><p id="resident-note"></p></div><dl class="destination-facts"><div><dt>Landmark</dt><dd id="landmark"></dd></div><div><dt>Status</dt><dd id="destination-state"></dd></div><div><dt>Jump cost</dt><dd id="jump-cost"></dd></div></dl></div></div></details>
+      <details class="device-card"><summary>Device & developer notes</summary><div class="device-notes"><button id="signing-help" class="text-button">Show the Wedgie button guide</button><p id="device-status">No Wedgie connected</p><span id="device-detail">Your factory key stays on the chip.</span><p class="first-run">Connect installs or updates the Starproof app if needed. Review its source before approving on your device.</p><a class="source-link" href="https://github.com/NikolaiL/wedgie-starproof/tree/main/device" target="_blank" rel="noreferrer">Review device code on GitHub ↗</a><a class="source-link" href="https://github.com/NikolaiL/wedgie-starproof#install-through-wedgiedev" target="_blank" rel="noreferrer">Installation guide ↗</a><p class="small-note">Flying, scanning and inspecting planets are free. Launching, travel, fuel and artifact recovery require a signature. This demo has no NFTs or transactions.</p></div></details>
     </div>
-
-    <section class="flight-log"><div class="log-heading"><div><p class="eyebrow">03 / EXPEDITION RECORD</p><h2>Your very official space diary.</h2></div><button id="export" class="text-button" disabled>Export signed receipts ↗</button></div><ol id="receipts"><li class="empty-log"><span>—</span>No signed actions yet. Connect a Wedgie to begin.</li></ol></section>
     <section class="verification-note"><span class="seal">◎</span><p><strong>Proof of a chip, not proof of a person.</strong> The server checks the Infineon certificate chain, the exact action and a fresh challenge. It cannot attest the device firmware or prove a human pressed the button.</p><a href="https://wedgie.dev/trustm.md" target="_blank" rel="noreferrer">Meet the hardware ↗</a></section>
   </main>
   <footer><span>STARPROOF / EXPERIMENTAL FLIGHT SOFTWARE · <a href="https://github.com/NikolaiL/starproof" target="_blank" rel="noreferrer">GITHUB ↗</a></span><span>NO TOKENS. NO TRANSACTION FEES. JUST SPACE.</span></footer>

@@ -27,14 +27,14 @@ The game pins this device repo as `starproof-device` and builds a same-origin bu
 ## Play
 
 1. Connect Wedgie. The server validates its certificate; this alone is not proof of key possession.
-2. **Let’s launch** and press green on Wedgie. A valid factory-key signature starts the mission.
-3. Fly with WASD/arrows. Space or **Send a sonar ping** scans the nearest system; select destinations on the chart or its buttons. Kepler’s Jelly Sentinel and Vega’s Moon Muncher react to your ping.
-4. **Jump here** spends **2–8 fuel based on distance** and requires a signature. The tank holds 8; short hops preserve fuel, while Sol–Moss consumes a full tank. The chart shows the exact cost before approval.
+2. **Launch expedition** and press green on Wedgie. A valid factory-key signature starts the mission.
+3. Click the map and fly with WASD/arrows. Space or **Scan** scans the nearest system; inspect a planet by clicking its name. Kepler’s Jelly Sentinel and Vega’s Moon Muncher react to your ping.
+4. **Travel** beneath a planet spends **2–8 fuel based on distance** and requires a signature. The tank holds 8; short hops preserve fuel, while Sol–Moss consumes a full tank. The chart shows the exact cost before approval.
 5. **Refuel** uses one free full-tank cache per planet; later full refills cost **4 in-game credits**. Start with 8 credits; each artifact pays 4, enough for one refill. **Scavenge** gathers up to 2 free fuel per signed action, so running out of credits cannot strand you. These credits have no real-world value.
-6. **Bag the artifact** collects the current planet’s unique loot. Kepler also contains the **Nebula Reach** map (Vega and Lyra); Lyra contains the **Wild Frontier** map (Cinder and Moss). Recovered maps reveal their stars on the same chart, which expands as your known universe grows. Locked regions cannot be reached, including through direct API requests.
-7. Export signed receipts to inspect the certificate, complete signed text, and `(r,s)` signature.
+6. **Collect artifact +4** beneath your current planet collects the current planet’s unique loot. Kepler also contains the **Nebula Reach** map (Vega and Lyra); Lyra contains the **Wild Frontier** map (Cinder and Moss). Recovered maps reveal their stars on the same chart, which expands as your known universe grows. Locked regions cannot be reached, including through direct API requests.
+7. Fuel, credits and artifact totals stay at the top. The captain’s diary, planet reports and developer notes are below the playing field. Export signed receipts to inspect the certificate, complete signed text, and `(r,s)` signature.
 
-The dark confirmation window has stars and passing comets. Its animated hardware guide points to the physical green button (**confirm**) and labels the red button (**cancel**). **How do the buttons work?** previews this guide without sending a signing request. Decorative motion stops when the browser’s reduced-motion preference is enabled.
+The dark confirmation window has stars and passing comets. Its animated hardware guide points to the physical green button (**confirm**) and labels the red button (**cancel**). **Show the Wedgie button guide** in Device & developer notes previews this guide without sending a signing request. Decorative motion stops when the browser’s reduced-motion preference is enabled.
 
 The red button declines. **Cancel request in browser** invalidates the server challenge and sends an ID-scoped cancel command to dismiss the Wedgie prompt without signing. Reinstall the updated device app for this feature; older copies block USB inside the prompt. A response already signed cannot be recalled, so the browser discards it after cancellation. There is no signing bypass for the virtual Wedgie or a software key. An emulator may preview the app UI but cannot pass the production certificate check.
 
@@ -48,6 +48,7 @@ Local games use process memory and disappear on restart. The Vercel deployment u
 | --- | --- |
 | `wedgie-actions/browser` | Shared Web Serial SDK, served by this app at `/sdk.js` |
 | `public/graphics.js` | Procedural planet, monster and ship artwork; no downloaded assets |
+| `public/navigation.js` | Responsive map projection and per-planet action states |
 | `public/approval.js` | Animated hardware guide and confirmation status |
 | `public/protocol.js` | Star systems; the server uses `wedgie-actions/protocol` for encoding |
 | `starproof-device/device/starproof_protocol.py` | Strict MicroPython parsing of the exact signed action |

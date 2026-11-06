@@ -6,7 +6,7 @@ import { trustM } from 'wedgie-actions/server';
 
 const PUBLIC = new URL('./public/', import.meta.url);
 const FILES = { '/': ['index.html', 'text/html'], '/style.css': ['style.css', 'text/css'],
-  '/app.js': ['app.js', 'text/javascript'], '/graphics.js': ['graphics.js', 'text/javascript'], '/approval.js': ['approval.js', 'text/javascript'],
+  '/app.js': ['app.js', 'text/javascript'], '/graphics.js': ['graphics.js', 'text/javascript'], '/navigation.js': ['navigation.js', 'text/javascript'], '/approval.js': ['approval.js', 'text/javascript'],
   '/device-install.json': ['device-install.json', 'application/json'], '/vendor/installer.js': ['vendor/installer.js', 'text/javascript'],
   '/wedgie-model.js': ['wedgie-model.js', 'text/javascript'], '/vendor/wedgie3d.js': ['vendor/wedgie3d.js', 'text/javascript'],
   '/3d/wedgie.json': ['3d/wedgie.json', 'application/json'], '/3d/wedgie.bin': ['3d/wedgie.bin', 'application/octet-stream'],

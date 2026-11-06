@@ -188,9 +188,9 @@ test('HTTP serves the game, isolates sessions and refuses cross-origin, oversize
   const base = `http://127.0.0.1:${app.address().port}`;
   const page = await fetch(base);
   assert.equal(page.status, 200);
-  assert.match(await page.text(), /SPACE GETS/);
+  assert.match(await page.text(), /Space gets weird/);
   assert.match(page.headers.get('content-security-policy'), /frame-ancestors 'none'/);
-  for (const asset of ['/graphics.js', '/approval.js']) {
+  for (const asset of ['/graphics.js', '/navigation.js', '/approval.js']) {
     const response = await fetch(base + asset);
     assert.equal(response.status, 200);
     assert.match(response.headers.get('content-type'), /javascript/);
