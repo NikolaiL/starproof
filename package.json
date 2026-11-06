@@ -22,7 +22,7 @@
   "homepage": "https://github.com/NikolaiL/starproof#readme",
   "dependencies": {
     "three": "^0.187.0",
-    "wedgie-actions": "https://codeload.github.com/NikolaiL/wedgie-actions/tar.gz/bc1613123ac7baff4daf8f2f78bac4b86d1da022"
+    "wedgie-actions": "https://codeload.github.com/NikolaiL/wedgie-actions/tar.gz/be420fed05279346479c922b8c2471a010319add"
   },
   "devDependencies": {
     "esbuild": "^0.28.2",

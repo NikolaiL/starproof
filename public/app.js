@@ -126,7 +126,7 @@ $('connect').addEventListener('click', async () => {
       openInstall(bundle.version, bundle.source);
       void showModel({ action: 'install', target: 'sol' });
       try {
-        await installDevice(port, bundle, (progress, what) => { stopModelPress(); installProgress(progress, what); });
+        return await installDevice(port, bundle, (progress, what) => { stopModelPress(); installProgress(progress, what); });
       } finally { closeModel(); closeApproval(); }
     } });
     if (!signer.canCancel) throw new Error('Install the updated Starproof device app for refuelling and browser cancellation, then reconnect.');

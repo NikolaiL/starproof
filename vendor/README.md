@@ -5,3 +5,5 @@
 Copyright (c) 2026 Austin Griffith; MIT, see `WEDGIE-LICENSE.txt`. The only renderer adaptation disables decorative movement under reduced motion. Starproof mounts it with `interactive: false`; the browser cannot approve a physical request. `npm run build` bundles it and Three.js locally; no CDN scripts are loaded. Three.js is MIT-licensed under its package's LICENSE.
 
 `repl.ts`, `files.ts`, and `FREE_PY` in `free-app.ts` are reused from the same pinned Wedgie commit under the same license. `starproof-installer.ts` is Starproof's restricted integration: it writes only the four pinned app modules and selects Starproof after a physical full-control approval. The compiled files include the upstream license.
+
+The integration waits for the installed app using read-only firmware `hello` requests. A replacement USB port is returned only after its board ID matches the originally selected device and it reports Starproof running; the signer then checks its normal app handshake.

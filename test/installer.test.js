@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { runInstall, validateBundle } from '../public/vendor/installer.js';
+import { runInstall, validateBundle, waitForApp } from '../public/vendor/installer.js';
 
 const bundle = JSON.parse(readFileSync(new URL('../public/device-install.json', import.meta.url)));
 test('installer ships the exact pinned device repo and refuses corrupt or unsafe payloads', async () => {
@@ -55,4 +55,52 @@ test('unsupported, busy or failed chip checks never request install approval', a
     };
     await assert.rejects(runInstall(repl, bundle, () => {}), error);
   }
+});
+
+test('installer waits through USB restart and returns only the same board running Starproof', async (t) => {
+  const requests = [], closes = [];
+  let starts = 0, polls = 0;
+  const uid = 'original-board';
+  function makePort(board, running) {
+    let incoming;
+    return {
+      connected: true,
+      getInfo() { return { usbVendorId: 0x2e8a }; },
+      get readable() { return new ReadableStream({ start(c) { incoming = c; } }); },
+      get writable() { return new WritableStream({ write(bytes) {
+        const message = JSON.parse(new TextDecoder().decode(bytes)); requests.push(message.type);
+        incoming.enqueue(new TextEncoder().encode(JSON.stringify({ type: 'hello', uid: board, running: running() }) + '\n'));
+      } }); },
+      async open() {}, async close() { closes.push(board); },
+    };
+  }
+  const stale = { connected: true, getInfo() { return { usbVendorId: 0x2e8a }; }, async open() { this.connected = false; throw new Error('The device has been lost.'); }, async close() {} };
+  const other = makePort('another-board', () => 'starproof');
+  const target = makePort(uid, () => ++starts === 1 ? 'blocks' : 'starproof');
+  const serial = new EventTarget();
+  serial.getPorts = async () => { polls++; return [other, target]; };
+  Object.defineProperty(navigator, 'serial', { configurable: true, value: serial });
+  t.after(() => delete navigator.serial);
+  const progress = [];
+  assert.equal(await waitForApp(stale, uid, (p, text) => progress.push(text)), target);
+  assert.equal(polls, 2);
+  assert.equal(starts, 2);
+  assert.ok(closes.includes('another-board'));
+  assert.equal(closes.filter(board => board === uid).length, 2, 'release the probe before handing the port to the signer');
+  assert.ok(requests.every(type => type === 'hello'), 'waiting must never install, sign or stop an app');
+  assert.match(progress[0], /Waiting for Starproof/);
+});
+
+test('restart wait is bounded and a missing board identity cannot select another device', async (t) => {
+  let polls = 0, now = 0;
+  const serial = new EventTarget();
+  serial.getPorts = async () => { polls++; now += 8000; return []; };
+  Object.defineProperty(navigator, 'serial', { configurable: true, value: serial });
+  t.after(() => delete navigator.serial);
+  t.mock.method(Date, 'now', () => now);
+  const stale = { connected: false, getInfo() { return { usbVendorId: 0x2e8a }; } };
+  await assert.rejects(waitForApp(stale, undefined, () => {}), /identity is unavailable/);
+  assert.equal(polls, 0);
+  await assert.rejects(waitForApp(stale, 'original-board', () => {}), /installed.*has not responded/);
+  assert.equal(polls, 2);
 });

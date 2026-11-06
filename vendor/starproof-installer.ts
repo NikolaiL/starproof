@@ -51,10 +51,38 @@ export async function runInstall(r: Repl, bundle: any, onProgress: (p: number, w
   await writeFile(r, '/apps.json', new TextEncoder().encode(JSON.stringify([app])));
   } finally { await r.leave({ reset: false }); }
   onProgress(1, 'Installed. Connecting to Starproof');
+  return hello.uid;
+}
+
+export async function waitForApp(port: SerialPort, uid: string, onProgress: (p: number, what: string) => void) {
+  if (typeof uid !== 'string' || !uid) throw new Error('Starproof was installed, but the device identity is unavailable. Click Connect Wedgie again.');
+  onProgress(1, 'Installed. Waiting for Starproof to start');
+  const deadline = Date.now() + 15000;
+  while (Date.now() < deadline) {
+    // A reboot may replace the port. Only return the originally selected board, already running our app.
+    const ports = [port, ...await navigator.serial.getPorts()];
+    for (const candidate of new Set(ports)) {
+      if (Date.now() >= deadline) break;
+      if (candidate.getInfo().usbVendorId !== 0x2e8a || candidate.connected === false) continue;
+      const probe = new Repl(candidate);
+      let ready = false;
+      try {
+        await probe.open();
+        const hello = await probe.hello(700);
+        ready = hello?.uid === uid && hello.running === 'starproof';
+      } catch { /* The USB port can disappear briefly while the app restarts. */ }
+      finally { await probe.close(); }
+      if (ready) return candidate;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+  throw new Error('Starproof was installed, but it has not responded after restarting. Reconnect the device and click Connect Wedgie again.');
 }
 
 export async function installDevice(port: SerialPort, bundle: any, onProgress: (p: number, what: string) => void) {
   const r = new Repl(port);
-  try { await r.open(); await runInstall(r, bundle, onProgress); }
+  let uid: string;
+  try { await r.open(); uid = await runInstall(r, bundle, onProgress); }
   finally { await r.close(); }
+  return waitForApp(port, uid, onProgress);
 }
