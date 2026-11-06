@@ -241,8 +241,22 @@ test('HTTP serves the game, isolates sessions and refuses cross-origin, oversize
   const base = `http://127.0.0.1:${app.address().port}`;
   const page = await fetch(base);
   assert.equal(page.status, 200);
-  assert.match(await page.text(), /Space gets weird/);
+  const html = await page.text();
+  assert.match(html, /Space gets weird/);
+  assert.match(html, /property="og:image" content="https:\/\/starproof-wedgie.vercel.app\/media\/starproof-og.png"/);
+  assert.match(html, /rel="icon" href="\/favicon.svg"/);
   assert.match(page.headers.get('content-security-policy'), /frame-ancestors 'none'/);
+  for (const [asset, width, height] of [['/media/starproof-cover.png',1600,900],['/media/starproof-og.png',1200,630],['/favicon-16.png',16,16],['/favicon-32.png',32,32],['/apple-touch-icon.png',180,180]]) {
+    const response = await fetch(base + asset);
+    assert.equal(response.status, 200);
+    assert.match(response.headers.get('content-type'), /image\/png/);
+    const bytes = Buffer.from(await response.arrayBuffer());
+    assert.equal(bytes.subarray(0, 8).toString('hex'), '89504e470d0a1a0a');
+    assert.equal(bytes.readUInt32BE(16), width); assert.equal(bytes.readUInt32BE(20), height);
+  }
+  const favicon = await fetch(base + '/favicon.ico');
+  assert.match(favicon.headers.get('content-type'), /image\/x-icon/);
+  assert.equal(Buffer.from(await favicon.arrayBuffer()).readUInt16LE(2), 1);
   for (const asset of ['/graphics.js', '/navigation.js', '/approval.js']) {
     const response = await fetch(base + asset);
     assert.equal(response.status, 200);

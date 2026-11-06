@@ -6,6 +6,11 @@ import { trustM } from 'wedgie-actions/server';
 
 const PUBLIC = new URL('./public/', import.meta.url);
 const FILES = { '/': ['index.html', 'text/html'], '/style.css': ['style.css', 'text/css'],
+  '/favicon.svg': ['favicon.svg', 'image/svg+xml'], '/favicon.ico': ['favicon.ico', 'image/x-icon'],
+  '/favicon-16.png': ['favicon-16.png', 'image/png'], '/favicon-32.png': ['favicon-32.png', 'image/png'],
+  '/apple-touch-icon.png': ['apple-touch-icon.png', 'image/png'],
+  '/media/starproof-cover.png': ['media/starproof-cover.png', 'image/png'], '/media/starproof-cover.svg': ['media/starproof-cover.svg', 'image/svg+xml'],
+  '/media/starproof-og.png': ['media/starproof-og.png', 'image/png'], '/media/starproof-og.svg': ['media/starproof-og.svg', 'image/svg+xml'],
   '/launch-crew.svg': ['launch-crew.svg', 'image/svg+xml'],
   '/app.js': ['app.js', 'text/javascript'], '/graphics.js': ['graphics.js', 'text/javascript'], '/navigation.js': ['navigation.js', 'text/javascript'], '/approval.js': ['approval.js', 'text/javascript'],
   '/device-install.json': ['device-install.json', 'application/json'], '/vendor/installer.js': ['vendor/installer.js', 'text/javascript'],

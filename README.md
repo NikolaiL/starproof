@@ -2,6 +2,8 @@
 
 A browser space-exploration reference game for [wedgie-actions](https://github.com/NikolaiL/wedgie-actions), using a Wedgie with an **OPTIGA Trust M** chip. Expedition launch always requires a manufacturer-certified factory-key signature. **Demo admin settings** let you configure whether travel, artifact collection, refuelling and scavenging also require Wedgie confirmation; all four default to on. Flying, scanning and inspecting destinations need no signature.
 
+Submission materials: [hackathon copy](docs/HACKATHON_SUBMISSION.md) · [cover, social image and icons](docs/BRAND_ASSETS.md).
+
 ## Screenshots
 
 ![Starproof browser game with the central Start exploring button, planet map and ship resources](docs/images/starproof-game.jpg)
