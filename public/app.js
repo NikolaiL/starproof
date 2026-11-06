@@ -137,7 +137,9 @@ $('connect').addEventListener('click', async () => {
     notice('Connected. Authorize the expedition, then check your Wedgie.');
   } catch (error) {
     await signer.disconnect();
-    notice(error.message);
+    notice(/failed to open serial port|serial port is already open/i.test(error.message)
+      ? 'Could not open Wedgie’s USB port. Close other wedgie.dev and Starproof tabs, or serial tools. Unplug and reconnect your Wedgie, then try Connect Wedgie again.'
+      : error.message);
   } finally { busy = false; render(); }
 });
 signer.addEventListener('disconnect', () => {

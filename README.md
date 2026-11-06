@@ -24,6 +24,8 @@ The installable app has its own repository: [NikolaiL/wedgie-starproof](https://
 
 The game pins this device repo as `starproof-device` and builds a same-origin bundle containing the exact source files and SHA-256 checksums. Device source is maintained only in that repo. Installation selects Starproof as the running app; the app creates no keys, locks no objects, and never writes Safe Signer’s key slots. Existing factory identity is used as provisioned. Device restart closes installer access.
 
+Only one tab or serial tool can hold the Wedgie USB connection. If the port cannot open, close other wedgie.dev and Starproof tabs (and tools such as `wedgie.py`), unplug and reconnect the device, then try Connect again in one game tab.
+
 ## Play
 
 1. Connect Wedgie. The server validates its certificate; this alone is not proof of key possession.
