@@ -1,0 +1,14 @@
+{
+  "apps": [{
+    "mod": "starproof",
+    "name": "Starproof",
+    "about": "Sign an expedition launch, a star jump or an artifact claim with your Trust M.",
+    "files": ["device/starproof.py", "device/starproof_protocol.py"],
+    "entry": "run",
+    "fw": "0.3.76",
+    "chip": "OPTIGA Trust M",
+    "usb": true,
+    "label": "#8ce8c9",
+    "icon": ["............", ".....ww.....", ".....ww.....", "....wwww....", "..ggwwwwgg..", ".gggwwwwggg.", "....wwww....", ".....ww.....", "....rrrr....", ".....rr.....", "............", "............"]
+  }]
+}

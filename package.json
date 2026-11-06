@@ -1,0 +1,10 @@
+{
+  "name": "starproof",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A space exploration demo and Trust M action-signing toolkit.",
+  "engines": { "node": ">=24" },
+  "scripts": { "start": "node server.js", "test": "node --test test/*.test.js" },
+  "license": "MIT"
+}
