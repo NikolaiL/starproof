@@ -1,6 +1,6 @@
 # Starproof token
 
-Status: token deployed on Base mainnet and verified through direct contract reads and Clanker’s deployment record. The hardware airdrop is implemented in code but remains disabled until its separate distributor and claim service are configured and funded.
+Status: token deployed on Base mainnet and verified through direct contract reads and Clanker’s deployment record. The hardware airdrop is live, with its first 1,000-token claim confirmed onchain.
 
 ## Token details
 
@@ -33,8 +33,8 @@ The PNG is 1024×1024 and 536,208 bytes, below the [Clanker deploy form’s 1 MB
 
 [Editable SVG source](../public/media/starproof-token.svg). Composed from the project’s original `launch-crew.svg` with its existing palette and star mark, then exported with resvg-js. No image-generation model or external stock artwork was used.
 
-## Planned hardware airdrop
+## Live hardware airdrop
 
-The proposed reward is 1,000 tokens per verified Trust M chip, paid to a user-selected Safe. Launching this token does not implement or fund that claim flow. The separate distributor requires an explicit token allocation and the proof-verification and permanent claim design in [AIRDROP_DESIGN.md](AIRDROP_DESIGN.md). Do not describe claims as live until that integration is deployed and tested.
+The reward is 1,000 tokens per verified Trust M chip, paid once to a user-selected Safe. The [distributor](https://basescan.org/address/0x2c53e2bdf05e085fbff8f53585104db446fd39d0#code) was funded with 1,000,000 tokens; its [first live payout](https://basescan.org/tx/0x30f59545bbf780c35aa72c18ab4c6e44f1a5c42a40d9351c0bfed78268194640) sent exactly 1,000 tokens and consumed that chip’s claim. See the browser, device and contract flow in [AIRDROP_DESIGN.md](AIRDROP_DESIGN.md).
 
 Deployment transaction: [BaseScan](https://basescan.org/tx/0xc3a7de237b4e9e26bb0ebe4775c2429818323a6e492ae63894f876a232d97569). Clanker identifies it as a tax-token deployment. Two ordinary transfers and a distributor payout delivered the exact requested amount on a local fork at Base block 53,986,156. Trading fees and dividend settings are separate from the fixed hardware-drop payout.

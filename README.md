@@ -64,11 +64,11 @@ Local games use process memory and disappear on restart. The Vercel deployment u
 
 ## Hardware token drop
 
-[STARPROOF](https://basescan.org/token/0x469F27BC9CA19d78455867aAFc7aA4186d3cCccC) is deployed on Base mainnet with 18 decimals. The prepared airdrop pays 1,000 tokens once per verified chip to a user-selected Safe. It stays disabled until the separate distributor and claim service are configured and funded.
+[STARPROOF](https://basescan.org/token/0x469F27BC9CA19d78455867aAFc7aA4186d3cCccC) is deployed on Base mainnet with 18 decimals. The live airdrop pays 1,000 tokens once per verified chip to a user-selected Safe. The [Base distributor](https://basescan.org/address/0x2c53e2bdf05e085fbff8f53585104db446fd39d0#code) is deployed and funded; one device-approved payout has been confirmed onchain.
 
 Device app 0.5.0 reuses the already initialized Safe key and factory identity inside Starproof. It reviews the token and full recipient on two physical approval screens without app switching or wallet-key writes. The server verifies both proofs and Safe ownership; a fixed-amount distributor records the canonical factory-key claim ID permanently onchain. Demo confirmation switches do not apply to token claims.
 
-See [setup, trust boundaries and fork tests](docs/AIRDROP_DESIGN.md). The [administrator page](https://starproof-wedgie.vercel.app/airdrop-setup.html) prepares deploy and funding requests for the token deployment wallet. It never receives a private key. Mainnet deployment, funding and physical claim testing remain pending.
+See [setup, trust boundaries and fork tests](docs/AIRDROP_DESIGN.md). The [administrator page](https://starproof-wedgie.vercel.app/airdrop-setup.html) prepares deploy and funding requests for the token deployment wallet. It never receives a private key. Developers can follow the browser flow in [public/airdrop.js](public/airdrop.js), server verification in [lib/airdrop.js](lib/airdrop.js), onchain enforcement in [StarproofAirdrop.sol](contracts/StarproofAirdrop.sol), and the MicroPython approval/proof code in [starproof_claim.py](https://github.com/NikolaiL/wedgie-starproof/blob/main/device/starproof_claim.py). The first real-device claim succeeded; broader hardware cancellation and repeat-attempt testing remain pending.
 
 ## Toolkit layout
 
@@ -93,7 +93,7 @@ See [setup, trust boundaries and fork tests](docs/AIRDROP_DESIGN.md). The [admin
 
 The server reconstructs the signed payload, binding the protocol, origin, mission, certificate fingerprint, action, source, destination, action cost (fuel for a jump; credits for a refill), sequence, expiry and random nonce. The device hashes those exact bytes; a copied certificate alone is insufficient. The server validates the certificate again at commit and accepts the challenge once.
 
-This proves **participation by a certified chip**, not approved firmware, human presence, one person per chip, or bot resistance. A modified app on a genuine chip can sign automatically. The deployed server is the authority for this demo; changing its code can bypass its rules. There is no smart-contract enforcement or sponsor integration yet. See [THREAT_MODEL.md](THREAT_MODEL.md) and [SPONSORS.md](SPONSORS.md).
+This proves **participation by a certified chip**, not approved firmware, human presence, one person per chip, or bot resistance. A modified app on a genuine chip can sign automatically. The deployed server is the authority for this demo; changing its code can bypass its rules. Gameplay remains offchain. The separate airdrop contract enforces fixed payouts and one claim per admitted chip ID, while trusting the server’s proof issuer. No sponsor integration is included. See [THREAT_MODEL.md](THREAT_MODEL.md) and [SPONSORS.md](SPONSORS.md).
 
 ## Vercel deployment
 

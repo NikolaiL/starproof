@@ -1,6 +1,6 @@
 # Hardware-controlled ERC-20 airdrop
 
-Status: implementation prepared and tested on a local Base fork; no distributor has been deployed or funded on mainnet. The token is [STARPROOF on Base](TOKEN_LAUNCH_DRAFT.md), `0x469F27BC9CA19d78455867aAFc7aA4186d3cCccC`, with 18 decimals. Each eligible Trust M chip receives 1,000 tokens once per campaign. The administrator is the token deployment wallet, `0x8D6230427a37986D25Fe4D5B3d0aaEF1b924fEd6`, as selected by the user.
+Status: live on Base mainnet. The funded distributor is [`0x2c53e2bdf05e085fbff8f53585104db446fd39d0`](https://basescan.org/address/0x2c53e2bdf05e085fbff8f53585104db446fd39d0#code); its source has an [exact match on Sourcify](https://repo.sourcify.dev/8453/0x2c53e2bdf05e085fbff8f53585104db446fd39d0). A [real-device claim paid exactly 1,000 tokens](https://basescan.org/tx/0x30f59545bbf780c35aa72c18ab4c6e44f1a5c42a40d9351c0bfed78268194640), and its chip claim is recorded onchain. The full flow also passed on a local Base fork. The token is [STARPROOF on Base](TOKEN_LAUNCH_DRAFT.md), `0x469F27BC9CA19d78455867aAFc7aA4186d3cCccC`, with 18 decimals. Each eligible Trust M chip receives 1,000 tokens once per campaign. The administrator is the token deployment wallet, `0x8D6230427a37986D25Fe4D5B3d0aaEF1b924fEd6`, as selected by the user.
 
 ## Recommended device flow
 
@@ -33,7 +33,7 @@ The existing game Redis records expire after two idle hours. They cannot be the 
 
 Certificate verification remains offchain, so the distributor trusts the voucher issuer's enrollment decisions. A compromised issuer could authorize fake identities against the funded budget. The proof establishes certified-chip participation; it does not attest the complete Wedgie assembly, approved firmware or a unique human. Replacing the secure chip creates a different chip identity.
 
-Before deployment, test the configured chain/token on a local fork: both proof signatures, substituted recipient/key/certificate, expired/replayed vouchers, simultaneous claims, different-wallet repeats, decimals, failed token transfers, relayer retries and Safe ownership validation. Test physical approval, cancellation, RAM and return to gameplay on hardware. No mainnet funds or keys were changed during implementation.
+Before deployment, test the configured chain/token on a local fork: both proof signatures, substituted recipient/key/certificate, expired/replayed vouchers, simultaneous claims, different-wallet repeats, decimals, failed token transfers, relayer retries and Safe ownership validation. Test physical approval, cancellation, RAM and return to gameplay on hardware. Initial implementation tests used an isolated local fork; the user subsequently deployed, funded and completed the first live claim.
 
 ## Sources checked
 
@@ -51,7 +51,7 @@ Before deployment, test the configured chain/token on a local fork: both proof s
 2. Open `/airdrop-setup.html`, verify the full public issuer address and source, and use the token deployment wallet to review and deploy the contract. This page prepares wallet transactions; the wallet signs them.
 3. Choose the number of 1,000-token claims to fund. There is no default funding budget. The wallet reviews a separate ERC-20 transfer into the newly deployed distributor.
 4. Pin the confirmed distributor address in `AIRDROP_CONTRACT`. The backend checks its compiled runtime, fixed token/amount/campaign, owner and issuer before enabling claims. Fund only the dedicated issuer’s gas balance with the chosen relay budget.
-5. Connect Wedgie to install device app 0.5.0, then test both physical review pages, browser cancellation and a complete claim. Device RAM and physical behavior have not yet been verified for this version.
+5. Connect Wedgie to install device app 0.5.0, then test both physical review pages, browser cancellation and a complete claim. The first live physical approval and payout succeeded; broader RAM, cancellation and repeat-attempt checks remain pending.
 
 The UI lists supported deployed Safe 1.4.1 accounts owned by the proven signer, allows an explicitly entered address, and verifies proxy and singleton bytecode plus onchain ownership. Safes created by the current official Wedgie flow use this version. Older versions require separate support rather than being silently accepted.
 
