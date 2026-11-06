@@ -4,7 +4,7 @@ A browser space-exploration reference game for [wedgie-actions](https://github.c
 
 ## Screenshots
 
-![Starproof browser game with the central Start exploring button, planet map and ship resources](docs/images/starproof-game.png)
+![Starproof browser game with the central Start exploring button, planet map and ship resources](docs/images/starproof-game.jpg)
 
 The browser game starts here; recovered star maps expand the same playing field to 20 planets.
 
