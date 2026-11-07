@@ -1,9 +1,7 @@
-import { createPublicClient, createWalletClient, custom, getAddress, keccak256, toHex, zeroAddress } from 'viem';
-import { packetToBytes } from 'viem/ens';
-import { base, mainnet } from 'viem/chains';
-import { PROFILE_KEYS, resolverAbi, currentResolver, profileNames, readProfile, textCall } from '../public/ens-profile.js';
+import { createPublicClient, createWalletClient, custom, getAddress, toHex, zeroAddress } from 'viem';
+import { base } from 'viem/chains';
 import artifact from '../lib/monsters-artifact.json' with { type: 'json' };
-export { profileNames, readProfile, base, mainnet };
+export { base };
 
 export async function connectWallet(provider, chain = base, progress = () => {}) {
   if (!provider) throw new Error('Open Starproof in a browser with an Ethereum wallet.');
@@ -23,7 +21,6 @@ export async function connectWallet(provider, chain = base, progress = () => {})
   const current = await request({ method: 'eth_accounts' });
   if (String(current[0]).toLowerCase() !== String(accounts[0]).toLowerCase()) throw new Error('Wallet account changed. Reconnect before continuing.');
   const account = getAddress(current[0]);
-  // ENS resolution stays in the user's wallet; no public RPC or third-party gateway is proxied by our server.
   const client = createPublicClient({ chain, transport: custom(provider), ccipRead: false });
   const wallet = createWalletClient({ account, chain, transport: custom(provider) });
   return { account, client, wallet };
@@ -35,33 +32,6 @@ export async function writeConfirmed(connection, address, abi, functionName, arg
   const receipt = await client.waitForTransactionReceipt({ hash, timeout: 180000 });
   if (receipt.status !== 'success') throw new Error('The transaction reverted.');
   return hash;
-}
-export async function publishProfile(connection, names, progress = () => {}) {
-  const { client, account } = connection;
-  const addresses = await Promise.all(Object.values(names).map(name => client.getEnsAddress({ name })));
-  if (addresses.some(address => address?.toLowerCase() !== account.toLowerCase())) throw new Error('Both names must resolve to your connected wallet. Set their address records in ENS first.');
-  for (const [name, key, value] of [[names.captain, PROFILE_KEYS.ship, names.ship], [names.ship, PROFILE_KEYS.captain, names.captain]]) {
-    progress('Review the profile record for ' + name + ' in your wallet…');
-    const resolver = await currentResolver(client, name);
-    await writeConfirmed(connection, resolver, resolverAbi, 'setText', [toHexName(name), key, value]);
-  }
-  return readProfile(client, names);
-}
-function toHexName(name) {
-  return toHex(packetToBytes(name));
-}
-export async function delegateLogbook(connection, names, delegate, revoke = false) {
-  delegate = getAddress(delegate);
-  if (delegate === zeroAddress || delegate === connection.account) throw new Error('Choose a different navigator wallet.');
-  const resolver = await currentResolver(connection.client, names.ship);
-  return writeConfirmed(connection, resolver, resolverAbi, revoke ? 'revokeRoles' : 'grantSetterRoles', revoke
-    ? [BigInt(keccak256(toHex(PROFILE_KEYS.logbook))), 1n << 4n, delegate]
-    : [textCall(names.ship, PROFILE_KEYS.logbook, ''), delegate]);
-}
-export async function writeLogbook(connection, names, value) {
-  if (!value.trim() || value.length > 280) throw new Error('Write a logbook entry of 1–280 characters.');
-  const resolver = await currentResolver(connection.client, names.ship);
-  return writeConfirmed(connection, resolver, resolverAbi, 'setText', [toHexName(names.ship), PROFILE_KEYS.logbook, value.trim()]);
 }
 export async function mintMonster(connection, voucher) {
   if (voucher.chainId !== base.id || getAddress(voucher.recipient) !== connection.account) throw new Error('Reconnect the receiving wallet on Base.');

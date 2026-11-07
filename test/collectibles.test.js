@@ -6,15 +6,13 @@ import { base } from 'viem/chains';
 import { Game } from '../lib/game.js';
 import { createMonsters, encounterTypedData } from '../lib/monsters.js';
 import { MONSTERS, hasEncounterProof } from '../public/monster-catalog.js';
-import { profileNames, readProfile, PROFILE_KEYS } from '../public/ens-profile.js';
-import { publishProfile, delegateLogbook, writeLogbook, writeConfirmed } from '../vendor/collectibles.js';
+import { writeConfirmed } from '../vendor/collectibles.js';
 import artifact from '../lib/monsters-artifact.json' with { type: 'json' };
 import { testIdentity } from './fixtures/pki.js';
 import { readFile } from 'node:fs/promises';
 const origin = 'http://localhost:4178';
 const account = '0x1111111111111111111111111111111111111111';
 const issuerKey = '0x' + BigInt(0xA11CE).toString(16).padStart(64, '0'); // Public local-test key only.
-const names = profileNames('Captain.Example.eth', 'Ship.Example.eth');
 function mission() {
   const identity = testIdentity(), game = new Game(identity.verifier);
   const sign = (action, target) => { const pending = game.challenge(action, target, identity.certificate, origin); game.complete(pending.id, identity.signAction(pending.text)); };
@@ -51,34 +49,15 @@ test('mint eligibility rejects unsigned, relabeled, cross-mission and wrong-orig
   await assert.rejects(monsters.voucher(game, args, origin), /does not match/);
   assert.equal((await createMonsters({ rpcUrl:'SECRET-RPC',contract:'SECRET-CONTRACT',issuerKey:'SECRET-KEY' }).config()).enabled, false);
 });
-test('ENS profile uses normalized names, reciprocal records and a matching resolved captain address', async () => {
-  assert.equal(names.captain, 'captain.example.eth');
-  assert.throws(() => profileNames('same.eth', 'same.eth'), /distinct/);
-  const client = { getEnsAddress: async () => account, getEnsText: async ({key}) => key === PROFILE_KEYS.ship ? names.ship : key === PROFILE_KEYS.captain ? names.captain : 'Reached Kepler' };
-  assert.equal((await readProfile(client, names)).logbook, 'Reached Kepler');
-  await assert.rejects(readProfile({ ...client, getEnsText: async () => 'unrelated.eth' }, names), /not linked/);
-  await assert.rejects(readProfile({ ...client, getEnsAddress: async () => null }, names), /resolve/);
-});
-test('ENS writes discover the current resolver and remain pending until confirmation; delegation is key-scoped and revocable', async () => {
-  const calls = [], records = new Map(); let resolvers = 0, confirmed = 0;
-  const client = { getEnsAddress: async () => account, getEnsResolver: async () => (++resolvers === 1 ? account : '0x2222222222222222222222222222222222222222'),
-    getEnsText: async ({name,key}) => records.get(name + key),
-    simulateContract: async request => { calls.push(request); return {request}; },
-    waitForTransactionReceipt: async () => { confirmed++; return {status:'success'}; },
+test('wallet writes simulate, submit and await confirmation, and reject reverted transactions', async () => {
+  const calls = [];
+  const client = {
+    simulateContract: async request => { calls.push('simulate'); return {request}; },
+    waitForTransactionReceipt: async () => { calls.push('confirmed'); return {status:'success'}; },
   };
-  const connection = { account, client, wallet: { writeContract: async request => {
-    assert.equal(calls.length - 1, confirmed, 'never start the next write before the preceding receipt');
-    if(request.functionName === 'setText') records.set((request.args[1] === PROFILE_KEYS.ship ? names.captain : names.ship) + request.args[1], request.args[2]);
-    return '0x123';
-  } } };
-  await publishProfile(connection, names);
-  assert.equal(confirmed, 2); assert.notEqual(calls[0].address, calls[1].address);
-  await delegateLogbook(connection, names, '0x3333333333333333333333333333333333333333');
-  assert.equal(calls.at(-1).functionName, 'grantSetterRoles');
-  await delegateLogbook(connection, names, '0x3333333333333333333333333333333333333333', true);
-  assert.equal(calls.at(-1).args[1], 16n);
-  assert.equal(calls.at(-1).functionName, 'revokeRoles');
-  await assert.rejects(writeLogbook(connection, names, 'x'.repeat(281)), /1–280/);
+  const connection = { account, client, wallet: { writeContract: async () => { calls.push('submit'); return '0x123'; } } };
+  assert.equal(await writeConfirmed(connection, account, [], 'example', []), '0x123');
+  assert.deepEqual(calls, ['simulate', 'submit', 'confirmed']);
   client.waitForTransactionReceipt = async () => ({status:'reverted'});
   await assert.rejects(writeConfirmed(connection, account, [], 'example', []), /reverted/);
 });
