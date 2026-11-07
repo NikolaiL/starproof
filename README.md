@@ -50,9 +50,9 @@ On desktop, the wordmark and tagline share a floating header with resource cards
 
 ### Arkiv expedition atlas
 
-Open the [Expedition atlas](https://starproof-wedgie.vercel.app/#expedition-atlas) after earning a signed flight receipt. Select a Rabdi wallet funded with tGLM, publish the latest signed milestone, and approve the write in your wallet. The atlas queries Rabdi and filters the resulting public entries by star system. The demo publishing wallet is `0x8D6230427a37986D25Fe4D5B3d0aaEF1b924fEd6`.
+Open the [Expedition atlas](https://starproof-wedgie.vercel.app/#expedition-atlas) after earning a signed flight receipt. Select a Rabdi wallet funded with tGLM, publish the latest signed milestone, and approve the write in your wallet. The atlas queries Rabdi and filters the resulting public entries by star system. The first verified entry records a visit to Orion, published by `0x8D6230427a37986D25Fe4D5B3d0aaEF1b924fEd6`. [Confirmed Rabdi transaction](https://rabdi.explorer.arkiv.network/tx/0x80ec04602251dde60854684be5e49c2023bb5e9dc438a39d2ff52f1b2e5309d7)
 
-Run a query for Sol with `node --input-type=module -e 'import {readExpeditions} from "./vendor/arkiv.js"; console.log(await readExpeditions("sol"));'` after installing dependencies. The [schema](arkiv/schema.md), [integration feedback](arkiv/friction.md), [reach](arkiv/reach.md), [design rationale](arkiv/why-arkiv.md), and [implementation](arkiv/how-you-use-arkiv.md) describe the demo. Codex assisted with the integration and documentation.
+Run the Orion query with `node --input-type=module -e 'import {readExpeditions} from "./vendor/arkiv.js"; console.log(await readExpeditions("orion"));'` after installing dependencies. The [schema](arkiv/schema.md), [integration feedback](arkiv/friction.md), [reach](arkiv/reach.md), [design rationale](arkiv/why-arkiv.md), and [implementation](arkiv/how-you-use-arkiv.md) describe the demo. Codex assisted with the integration and documentation.
 
 ### Hardware navigation
 
