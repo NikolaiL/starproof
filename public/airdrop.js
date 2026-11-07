@@ -3,7 +3,7 @@ export function mountAirdrop({signer,api,deviceJob,notice}) {
   let config=null,wallet=null,working=false,pending=false,claimed=false,cancelled=false,generation=0;
   const recipient=()=>($('drop-safe').value || $('drop-safe-manual').value).trim();
   function render() {
-    $('drop-load').disabled=working || !config?.enabled;
+    $('drop-load').disabled=working;
     $('drop-claim').disabled=working || pending || claimed || !config?.enabled || !wallet || !recipient();
     $('drop-claim').textContent=claimed?'Claimed on this chip':pending?'Transfer pending…':working?'Preparing claim…':'Claim 1,000 STARPROOF';
     $('drop-safe').disabled=working || pending; $('drop-safe-manual').disabled=working || pending;
@@ -15,10 +15,10 @@ export function mountAirdrop({signer,api,deviceJob,notice}) {
     $('drop-tx').hidden=!hash;
     if(hash){$('drop-tx').href='https://basescan.org/tx/'+hash;$('drop-tx').textContent='View transfer on Base ↗';}
   }
-  function showStatus(status) {
+  function showStatus(status,lookupMessage='') {
     claimed=!!status.claimed || status.status==='confirmed'; pending=!claimed && ['pending','authorized'].includes(status.status);
     showTransaction(status.txHash || status.hash);
-    $('drop-status').textContent=claimed?'This chip has claimed its 1,000 STARPROOF.':pending?'Your approved transfer is pending on Base.':status.status==='failed'?'The transfer failed. No chip claim was consumed; you can review and retry.':'';
+    $('drop-status').textContent=claimed?'This chip has claimed its 1,000 STARPROOF.':pending?'Your approved transfer is pending on Base.':status.status==='failed'?'The transfer failed. No chip claim was consumed; you can review and retry.':lookupMessage;
     render();
   }
   async function poll(myGeneration) {
@@ -34,18 +34,25 @@ export function mountAirdrop({signer,api,deviceJob,notice}) {
     }
   }
   $('drop-load').addEventListener('click',()=>deviceJob(async()=>{
-    if(working)return; working=true;claimed=false;pending=false;render();
+    if(working)return;
+    const lookupGeneration = ++generation;
+    working=true;wallet=null;claimed=false;pending=false;render();
     try {
       const reply=await signer.request('starproof_wallet',{},8000);
       if(reply.type!=='starproof_wallet')throw new Error('Update the Starproof device app, then reconnect.');
-      wallet={x:reply.x,y:reply.y,cert:reply.cert};
-      const result=await api('airdrop/wallets',{cert:wallet.cert,wallet});
-      if(result.claimed){showStatus(result);return;}
+      const discoveredWallet={x:reply.x,y:reply.y,cert:reply.cert};
+      const result=await api('airdrop/wallets',{cert:discoveredWallet.cert,wallet:discoveredWallet});
+      if(lookupGeneration!==generation)return;
       $('drop-safe').replaceChildren(new Option('Choose a receiving Safe',''),...result.safes.map(address=>new Option(address,address)));
       $('drop-safe-manual').value='';
-      $('drop-status').textContent=result.safes.length?'Choose the Safe that should receive your tokens.':'No supported Safes were found. Enter a deployed Safe 1.4.1 address owned by this Wedgie.';
-      showStatus(await api('airdrop/status',{cert:wallet.cert}));
-      if(pending)void poll(++generation);
+      let lookupMessage = 'Select a Safe to inspect its full address.';
+      if(result.discoveryUnavailable)lookupMessage='Safe discovery is temporarily unavailable. You can enter an address manually.';
+      else if(!result.safes.length)lookupMessage='No supported Safes were found. Enter a deployed Safe 1.4.1 address owned by this Wedgie.';
+      const claimStatus=await api('airdrop/status',{cert:discoveredWallet.cert});
+      if(lookupGeneration!==generation)return;
+      wallet=discoveredWallet;
+      showStatus(claimStatus,lookupMessage);
+      if(pending)void poll(lookupGeneration);
     }catch(error){notice(error.message);$('drop-status').textContent=error.message;}
     finally{working=false;render();}
   }));
@@ -60,7 +67,7 @@ export function mountAirdrop({signer,api,deviceJob,notice}) {
   }
   $('drop-cancel').addEventListener('click',cancel);$('drop-approval').addEventListener('cancel',cancel);
   $('drop-claim').addEventListener('click',()=>deviceJob(async()=>{
-    if(working || pending || claimed || !wallet)return;
+    if(working || pending || claimed || !config?.enabled || !wallet)return;
     working=true;cancelled=false;render();
     try {
       const challenge=await api('airdrop/challenge',{cert:wallet.cert,wallet,recipient:recipient()});
@@ -81,5 +88,6 @@ export function mountAirdrop({signer,api,deviceJob,notice}) {
     finally{$('drop-approval').close();working=false;render();}
   }));
   signer.addEventListener('disconnect',()=>{wallet=null;generation++;pending=false;claimed=false;render();});
+  render();
   void refresh();
 }

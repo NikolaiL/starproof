@@ -29,6 +29,23 @@ test('an unconfigured drop stays disabled without leaking invalid secret configu
   assert.doesNotMatch(JSON.stringify(result),/SECRET/);
 });
 
+test('Safe lookup bypasses payout configuration and claim checks', async t => {
+  const identity = testIdentity();
+  const session = { game: { device: null } };
+  const body = { cert: identity.certificate, wallet: identity.wallet };
+  const owner = signerAddress(identity.wallet);
+  const lookup = t.mock.method(globalThis, 'fetch', async url => {
+    assert.equal(String(url), `https://safe-transaction-base.safe.global/api/v1/owners/${owner}/safes/`);
+    return Response.json({ safes: [] });
+  });
+  const issuerKey = '0x' + 'a11ce'.padStart(64, '0');
+  for (const options of [{ rpcUrl: '', contract: '', issuerKey: '' }, { rpcUrl: 'https://payout.invalid', contract: TOKEN.address, issuerKey }]) {
+    const drop = createAirdrop({ verifier: identity.verifier, ...options });
+    assert.deepEqual(await drop.handle('/api/airdrop/wallets', session, body), { owner, safes: [], discoveryUnavailable: false });
+  }
+  assert.equal(lookup.mock.callCount(), 2);
+});
+
 test('real-token fork: certified device proof selects a genuine Safe and pays once through HTTP', {skip:!forkUrl,timeout:90000},async t=>{
   const url=new URL(forkUrl);assert.ok(['127.0.0.1','localhost'].includes(url.hostname));
   const identity=testIdentity();
