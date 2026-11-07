@@ -25,6 +25,7 @@ let cancellation;
 const keys = new Set();
 const planetNodes = new Map();
 const canvas = $('space'), ctx = canvas.getContext('2d');
+const destinations = $('destinations');
 const rocketLayer = $('rocket-layer'), rocketContext = rocketLayer.getContext('2d');
 const flightHeader = document.querySelector('.flight-header'), resourceBar = document.querySelector('.resource-bar');
 const portrait = $('planet'), portraitContext = portrait.getContext('2d');
@@ -67,11 +68,12 @@ for (const star of SECTORS) {
   const status = document.createElement('span'); status.className = 'planet-loot';
   const action = document.createElement('button'); action.type = 'button'; action.className = 'planet-action';
   action.addEventListener('click', () => { selected = star.id; render(); void commit(planetAction(state, star.id, deviceReady, busy).action, star.id); });
-  const info = document.createElement('button'); info.type = 'button'; info.className = 'planet-info-button'; info.textContent = 'i';
+  const info = document.createElement('button'); info.type = 'button'; info.className = 'planet-info-button';
+  const icon = document.createElement('span'); icon.textContent = 'i'; info.append(icon);
   info.setAttribute('aria-controls', 'planet-info'); info.setAttribute('aria-label', 'About ' + star.name);
   info.addEventListener('click', () => togglePlanetInfo(star.id));
   const title = document.createElement('div'); title.className = 'planet-title'; title.append(name, info);
-  node.append(title, status, action); $('destinations').append(node);
+  node.append(title, status, action); destinations.append(node);
   planetNodes.set(star.id, { node, name, status, action, info });
 }
 
@@ -428,14 +430,16 @@ function frame(time) {
   }
   mapView = journey ? { ...camera } : smoothCamera(mapView, camera, dt, reducedMotion);
   const point = (object) => mapPoint(object, view, w, h, mapView);
-  overview = Math.min(w / view.width, h / view.height) * mapView.zoom < 90;
+  const scale = Math.min(w / view.width, h / view.height) * mapView.zoom;
+  const labelScale = scale / 90;
+  overview = labelScale < 1;
   canvas.parentElement.dataset.overview = overview;
+  destinations.style.setProperty('--planet-label-scale', Math.max(.6, Math.min(1, labelScale)).toFixed(2));
   const stick = deviceInput && time - deviceInput.at < 250 ? deviceInput : { dx: 0, dy: 0 };
   const moving = state.started && !busy && !$('approval').open && (stick.dx || stick.dy || ['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].some((key) => keys.has(key)));
   if (state.started && !busy && !$('approval').open) {
     const dx = Math.max(-1, Math.min(1, stick.dx + (keys.has('KeyD') || keys.has('ArrowRight') ? 1 : 0) - (keys.has('KeyA') || keys.has('ArrowLeft') ? 1 : 0)));
     const dy = Math.max(-1, Math.min(1, stick.dy + (keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0) - (keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0)));
-    const scale = Math.min(w / view.width, h / view.height) * mapView.zoom;
     ship.x += dx * dt * 180 / scale;
     ship.y += dy * dt * 180 / scale;
     if (dx || dy) { const target = shipHeading(dx, dy); ship.heading += Math.atan2(Math.sin(target - ship.heading), Math.cos(target - ship.heading)) * (reducedMotion ? 1 : Math.min(1, dt * 14)); }

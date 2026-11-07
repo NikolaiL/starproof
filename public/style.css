@@ -93,7 +93,7 @@ meter::-webkit-meter-bar { background: #34394d; border: 0; height: 7px; }meter::
 #destinations { position: absolute; inset: 0; pointer-events: none; }
 .planet-node { position: absolute; left: 0; top: 0; width: 156px; text-align: center; pointer-events: auto; z-index: 1; }
 .planet-node.active, .planet-node:focus-within { z-index: 2; }
-.planet-name { border: 0; padding: 1px 10px 0; border-radius: 5px; background: #101329ad; color: var(--planet-color); font: 100 26px/1.1 var(--display); text-transform: uppercase; letter-spacing: .5px; text-shadow: 0 2px 8px #000; }
+.planet-name { min-width: 24px; min-height: 24px; border: 0; padding: 1px 10px 0; border-radius: 5px; background: #101329ad; color: var(--planet-color); font: 100 26px/1.1 var(--display); text-transform: uppercase; letter-spacing: .5px; text-shadow: 0 2px 8px #000; }
 .planet-name:hover, .planet-node.active .planet-name { color: var(--text); }
 .planet-loot { display: block; margin: 5px 0 7px; color: #dcd5ee; font-size: 10px; text-shadow: 0 2px 5px #000; }
 .is-collected .planet-loot { color: #a9c3b3; }
@@ -112,9 +112,10 @@ meter::-webkit-meter-bar { background: #34394d; border: 0; height: 7px; }meter::
 .canvas-wrap[data-started="false"] #destinations { opacity: .45; }
 .canvas-wrap[data-started="false"] #minimap,.canvas-wrap[data-started="false"] .map-controls { visibility: hidden; }
 .planet-title { display: flex; align-items: center; justify-content: center; gap: 5px; }
-.planet-title .planet-name { padding-inline: 0; }
-.planet-info-button { flex-shrink: 0; display: grid; place-items: center; width: 22px; height: 22px; padding: 0; border: 1px solid #bda9d3; border-radius: 50%; font: 700 12px Georgia, serif; color: #ddd0ee; background: #201b34; }
-.planet-info-button:hover,.planet-info-button[aria-expanded="true"] { color: #1a152b; background: var(--planet-color); border-color: var(--planet-color); }
+.planet-title .planet-name { padding-inline: 0; font-size: max(12px, calc(var(--planet-name-size, 26px) * var(--planet-label-scale, 1))); }
+.planet-info-button { flex-shrink: 0; display: grid; place-items: center; width: 24px; height: 24px; padding: 0; border: 0; background: transparent; }
+.planet-info-button span { display: grid; place-items: center; width: max(14px, calc(var(--planet-info-size, 22px) * var(--planet-label-scale, 1))); aspect-ratio: 1; border: 1px solid #bda9d3; border-radius: 50%; font: 700 max(9px, calc(var(--planet-info-font-size, 12px) * var(--planet-label-scale, 1))) Georgia, serif; color: #ddd0ee; background: #201b34; }
+.planet-info-button:is(:hover, [aria-expanded="true"]) span { color: #1a152b; background: var(--planet-color); border-color: var(--planet-color); }
 .planet-popup { width: min(370px, calc(100vw - 28px)); max-height: calc(100dvh - 40px); overflow: auto; position: fixed; inset: 95px 18px auto auto; margin: 0; padding: 14px 24px 22px; border: 2px solid #a38bc3; border-radius: 20px; background: radial-gradient(ellipse at top, #48326366, transparent 60%), #21192f; color: var(--text); box-shadow: 0 20px 110px #000b, 0 5px 0 #0a0612; }
 .planet-popup::backdrop { background: #09051530; }
 .planet-popup > canvas { display: block; width: 220px; height: 150px; margin: -7px auto 0; object-fit: contain; }
@@ -208,11 +209,11 @@ dialog[data-phase="verifying"] .press-pointer { display: none; }dialog[data-phas
 @media(max-width:390px) { .resource div > span { font-size: 8px; }.resource strong { font-size: 26px; }.resource small { font-size: 9px; }.device-scene { height: 202px; }.wedgie-model { zoom: .83; }.device-orbit { width: 260px; }dialog { padding-inline: 17px; }.wedgie-stripes { margin-inline: -17px; }.approval-heading h2 { font-size: 31px; } }
 @media(max-width:360px) { .planet-node { width: 104px; }.planet-action { font-size: 9px; } }
 @media(max-width:760px) { .canvas-wrap[data-worlds="2"] { height: clamp(340px, calc(100svh - 350px), 650px); }.canvas-wrap[data-worlds="4"] { height: clamp(440px, calc(100svh - 350px), 650px); } }
-@media(max-width:1200px) { .planet-title .planet-name { font-size: 20px; } }
+@media(max-width:1200px) { .planet-title .planet-name { --planet-name-size: 20px; } }
 @media(max-width:500px) {
   .launch-card { width: 260px; padding: 2px 18px 16px; }.launch-card img { width: 190px; height: 106px; margin-top: -16px; }.launch-card h2 { font-size: 33px; }.launch-card > p { font-size: 10px; margin: 10px 0 12px; }.launch-card .button { min-height: 45px; font-size: 15px; }.launch-card > span { font-size: 8px; }
   #minimap { width: 88px; height: 51px; bottom: 12px; left: 12px; }.map-controls { right: 10px; bottom: 12px; gap: 3px; padding: 4px; }.map-controls button { min-height: 32px; min-width: 27px; padding-inline: 6px; font-size: 9px; }
-  .planet-title .planet-name { font-size: 19px; }.planet-info-button { width: 20px; height: 20px; font-size: 11px; }.journey-banner { font-size: 13px; padding: 10px 13px; }.scan-readout { left: 12px; right: 12px; bottom: 76px; }
+  .planet-title .planet-name { --planet-name-size: 19px; }.planet-info-button span { --planet-info-size: 20px; --planet-info-font-size: 11px; }.journey-banner { font-size: 13px; padding: 10px 13px; }.scan-readout { left: 12px; right: 12px; bottom: 76px; }
   .planet-popup { padding: 12px 20px 18px; }.planet-popup > canvas { width: 200px; height: 140px; }
 }
 @media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation: none !important; transition: none !important; } }
