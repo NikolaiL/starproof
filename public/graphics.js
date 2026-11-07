@@ -157,7 +157,7 @@ export function journeyFrame(age) {
 
 export const journeyHeading = (from, to, progress) => shipHeading(to.x - from.x, to.y - from.y - Math.cos(progress * Math.PI) * 220);
 
-export function drawJourney(g, from, to, width, height, age, reduced = false) {
+export function drawJourney(g, from, to, width, height, age, reduced = false, shipContext = g) {
   const { progress, phase, t } = journeyFrame(age);
   if (!reduced && phase === 'warp') {
     const strength = Math.sin((t - .27) / .41 * Math.PI);
@@ -172,7 +172,11 @@ export function drawJourney(g, from, to, width, height, age, reduced = false) {
   g.restore();
   const x = from.x + (to.x - from.x) * progress, y = from.y + (to.y - from.y) * progress - (reduced ? 0 : Math.sin(progress * Math.PI) * 70);
   const heading = reduced ? 0 : journeyHeading(from, to, progress);
-  g.save(); g.translate(reduced ? to.x : x, (reduced ? to.y : y) - 35); g.scale(1.35, 1.35); drawShip(g, 0, 0, reduced ? 0 : age, !reduced && phase !== 'arrival', heading); g.restore();
+  shipContext.save();
+  shipContext.translate(reduced ? to.x : x, (reduced ? to.y : y) - 35);
+  shipContext.scale(1.35, 1.35);
+  drawShip(shipContext, 0, 0, reduced ? 0 : age, !reduced && phase !== 'arrival', heading);
+  shipContext.restore();
 }
 
 export function drawConfetti(g, origin, age, count = 80) {

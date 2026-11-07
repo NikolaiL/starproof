@@ -25,6 +25,7 @@ let cancellation;
 const keys = new Set();
 const planetNodes = new Map();
 const canvas = $('space'), ctx = canvas.getContext('2d');
+const rocketLayer = $('rocket-layer'), rocketContext = rocketLayer.getContext('2d');
 const flightHeader = document.querySelector('.flight-header'), resourceBar = document.querySelector('.resource-bar');
 const portrait = $('planet'), portraitContext = portrait.getContext('2d');
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -410,8 +411,14 @@ function frame(time) {
   const dt = Math.min((time - last) / 1000, .05); last = time;
   const artTime = reducedMotion ? 0 : time;
   const box = canvas.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2);
-  if (canvas.width !== Math.round(box.width * dpr) || canvas.height !== Math.round(box.height * dpr)) { canvas.width = Math.round(box.width * dpr); canvas.height = Math.round(box.height * dpr); }
+  const pixelWidth = Math.round(box.width * dpr), pixelHeight = Math.round(box.height * dpr);
+  if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
+    canvas.width = rocketLayer.width = pixelWidth;
+    canvas.height = rocketLayer.height = pixelHeight;
+  }
   const w = box.width, h = box.height; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h);
+  rocketContext.setTransform(dpr, 0, 0, dpr, 0, 0);
+  rocketContext.clearRect(0, 0, w, h);
   const controlsTop = Math.max(0, Math.max(flightHeader.getBoundingClientRect().bottom, resourceBar.getBoundingClientRect().bottom) - box.top);
   const controlsHeight = Math.max(0, Math.min(h, innerHeight - box.top) - controlsTop);
   for (const key of ['left', 'top', 'width', 'height']) view[key] += (viewTarget[key] - view[key]) * (reducedMotion ? 1 : Math.min(1, dt * 4));
@@ -460,12 +467,13 @@ function frame(time) {
     const { x, y } = point(star), active = star.id === selected;
     const size = overview ? .55 : w < 760 ? 1 : 1.45;
     const node = planetNodes.get(star.id).node;
-    const label = planetControls({ x, y: y - controlsTop }, (active ? 23 : 17) * size * 2.3, w, controlsHeight, node.offsetWidth, node.offsetHeight, w < 760 ? 31 : 43);
+    const radius = (active ? 23 : 17) * size;
+    const label = planetControls({ x, y: y - controlsTop }, radius * 2.3, w, controlsHeight, radius + 8);
     node.style.visibility = label.visible ? '' : 'hidden';
     node.style.transform = `translate(${label.x}px, ${label.y + controlsTop}px) translateX(-50%)`;
     ctx.strokeStyle = active ? '#deff6266' : '#a294fa20'; ctx.lineWidth = active ? 2 : 1; ctx.setLineDash(active ? [3, 7] : []);
     ctx.beginPath(); ctx.ellipse(x, y, (active ? 46 : 34) * size, (active ? 46 : 34) * size, 0, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
-    drawPlanet(ctx, star, x, y, (active ? 23 : 17) * size, artTime);
+    drawPlanet(ctx, star, x, y, radius, artTime);
     if (star.monster && !overview) {
       const mx = x + (w < 760 && x < w / 2 ? -23 : 23) * size, my = y - 13 * size, startled = pingAge < 3.5 && ping.target === star.id;
       ctx.strokeStyle = star.color + '88'; ctx.lineWidth = 1.5;
@@ -482,8 +490,11 @@ function frame(time) {
     const f = journeyFrame(age);
     const text = f.phase === 'departure' ? 'Leaving ' + sector(journey.from).name + '…' : f.phase === 'warp' ? '✦ Hyperspace. Hold onto your snacks.' : 'Welcome to ' + sector(journey.target).name + '!';
     if ($('journey-banner').textContent !== text) $('journey-banner').textContent = text;
-    drawJourney(ctx, point(sector(journey.from)), point(sector(journey.target)), w, h, age, reducedMotion);
-  } else if (state.started) drawShip(ctx, point(ship).x - 25, point(ship).y - 31, artTime, moving && !reducedMotion, ship.heading);
+    drawJourney(ctx, point(sector(journey.from)), point(sector(journey.target)), w, h, age, reducedMotion, rocketContext);
+  } else if (state.started) {
+    const { x, y } = point(ship);
+    drawShip(moving ? rocketContext : ctx, x - 25, y - 31, artTime, moving && !reducedMotion, ship.heading);
+  }
   if (celebration && !reducedMotion) drawConfetti(ctx, point(sector(celebration.target)), time - celebration.at, w < 760 ? 42 : 80);
   const radar = $('minimap').getContext('2d'); radar.clearRect(0, 0, 160, 92);
   for (const world of visibleWorlds()) {

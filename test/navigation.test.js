@@ -82,21 +82,17 @@ test('following corrects both camera lag and zoom transitions, including after m
   assert.equal(target.zoom, 6);
 });
 
-test('partly visible planets keep their complete controls inside every map edge', () => {
-  assert.equal(planetControls({ x: 10, y: 0 }, 40, 300, 0, 112, 98, 43).visible, false, 'a map scrolled completely out of view has no visible planets');
-  for (const [width, height, labelWidth, labelHeight] of [[298, 520, 112, 98], [740, 460, 112, 98], [1214, 365, 156, 101]]) {
+test('visible planet controls stay anchored below their planet at every map edge', () => {
+  assert.equal(planetControls({ x: 10, y: 0 }, 40, 300, 0, 43).visible, false);
+  for (const [width, height] of [[298, 520], [740, 460], [1214, 365]]) {
     const radius = 40;
     for (const point of [{ x: -39, y: height / 2 }, { x: width + 39, y: height / 2 }, { x: width / 2, y: -39 }, { x: width / 2, y: height + 39 }, { x: -20, y: -20 }]) {
-      const controls = planetControls(point, radius, width, height, labelWidth, labelHeight, 43);
-      assert.equal(controls.visible, true);
-      assert.ok(controls.x - labelWidth / 2 >= 8 && controls.x + labelWidth / 2 <= width - 8);
-      assert.ok(controls.y >= 8 && controls.y + labelHeight <= height - 8);
+      assert.deepEqual(planetControls(point, radius, width, height, 43), {
+        visible: true, x: point.x, y: point.y + 43,
+      });
     }
     for (const point of [{ x: -41, y: height / 2 }, { x: width / 2, y: height + 41 }, { x: -30, y: -30 }]) {
-      assert.equal(planetControls(point, radius, width, height, labelWidth, labelHeight, 43).visible, false);
+      assert.equal(planetControls(point, radius, width, height, 43).visible, false);
     }
-    const inside = planetControls({ x: width / 2, y: height / 2 }, radius, width, height, labelWidth, labelHeight, 43);
-    assert.equal(inside.x, width / 2);
-    assert.equal(inside.y, height / 2 + 43);
   }
 });

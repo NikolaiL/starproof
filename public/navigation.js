@@ -40,11 +40,11 @@ export function planetAction(state, id, ready, busy) {
   };
 }
 
-export function planetControls(point, radius, width, height, labelWidth, labelHeight, offset) {
+export function planetControls(point, radius, width, height, offset) {
   const dx = Math.max(0, -point.x, point.x - width), dy = Math.max(0, -point.y, point.y - height);
   return {
     visible: width > 0 && height > 0 && dx * dx + dy * dy <= radius * radius,
-    x: Math.max(labelWidth / 2 + 8, Math.min(width - labelWidth / 2 - 8, point.x)),
-    y: Math.max(8, Math.min(height - labelHeight - 8, point.y + offset)),
+    x: point.x,
+    y: point.y + offset,
   };
 }

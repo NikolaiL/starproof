@@ -46,7 +46,13 @@ Only one tab or serial tool can hold the Wedgie USB connection. If the port cann
 6. **Collect artifact +4** beneath your current planet collects its unique loot, with a confetti celebration. Kepler reveals **Nebula Reach**, Lyra **Wild Frontier**, Moss **Aurora Drift**, Cinder **Ember Expanse**, and Borealis **Midnight Verge**. One chart grows in every direction to **20 planets**. Locked regions cannot be reached, including through direct API requests. Accepted travel plays departure, warp and arrival animations.
 7. Fuel, credits and artifact totals stay at the top. **Demo settings** and the captain’s diary sit below the playing field. Export receipts to inspect signed text and evidence; unsigned demo entries are explicitly labeled.
 
-On desktop, branding, resources, verification status, location and the device connection share one floating header. **Connected** opens the Wedgie details menu; **Disconnect Wedgie** is available only inside that menu. Planet names and actions stay inside the visible map whenever part of a planet is visible, including during panning or page scrolling. Notifications use a dark panel with brief fade/slide transitions; reduced-motion preferences disable the transitions.
+On desktop, the wordmark and tagline share a floating header with resource cards, the current system, verification status, and the Wedgie control. **Connected** opens the Wedgie details menu with **Disconnect Wedgie** inside. Planet names and actions follow their planets as you pan or zoom. The moving rocket passes above map controls and below information pop-ups. Dark notifications fade and slide, with transitions disabled when reduced motion is enabled.
+
+### Arkiv expedition atlas
+
+Open the [Expedition atlas](https://starproof-wedgie.vercel.app/#expedition-atlas) after earning a signed flight receipt. Select a Rabdi wallet funded with tGLM, publish the latest signed milestone, and approve the write in your wallet. The atlas queries Rabdi and filters the resulting public entries by star system. The demo publishing wallet is `0x8D6230427a37986D25Fe4D5B3d0aaEF1b924fEd6`.
+
+Run a query for Sol with `node --input-type=module -e 'import {readExpeditions} from "./vendor/arkiv.js"; console.log(await readExpeditions("sol"));'` after installing dependencies. The [schema](arkiv/schema.md), [integration feedback](arkiv/friction.md), [reach](arkiv/reach.md), [design rationale](arkiv/why-arkiv.md), and [implementation](arkiv/how-you-use-arkiv.md) describe the demo. Codex assisted with the integration and documentation.
 
 ### Hardware navigation
 

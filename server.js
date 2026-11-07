@@ -32,6 +32,7 @@ FILES['/wallets.js'] = ['wallets.js', 'text/javascript'];
 FILES['/collectibles.js'] = ['collectibles.js', 'text/javascript'];
 FILES['/monster-catalog.js'] = ['monster-catalog.js', 'text/javascript'];
 FILES['/vendor/collectibles.js'] = ['vendor/collectibles.js', 'text/javascript'];
+FILES['/vendor/arkiv.js'] = ['vendor/arkiv.js', 'text/javascript'];
 const ROUTES = new Set(['GET /api/monsters', 'POST /api/monsters/voucher', 'GET /api/state', 'POST /api/device', 'POST /api/challenge', 'POST /api/commit', 'POST /api/cancel', 'POST /api/settings', 'POST /api/act', 'GET /api/airdrop', ...['wallets','status','challenge','proof','submit','cancel'].map(path => 'POST /api/airdrop/' + path)]);
 
 // Tests pass an ephemeral test PKI; the running server always uses the production verifier.
@@ -44,7 +45,7 @@ export function createHandler(verifier = trustM, { store, airdrop: providedAirdr
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Referrer-Policy', 'no-referrer');
     res.setHeader('Cache-Control', 'no-store');
-    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");
+    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self' https://rpc.rabdi.db-chain.testnet.arkiv.network; img-src 'self' data:; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");
     const json = (data, code = 200) => { res.writeHead(code, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(data)); };
     try {
       const host = req.headers.host || '';

@@ -17,6 +17,8 @@ header { height: 58px; padding: 0 32px; display: flex; align-items: center; gap:
 .brand { display: flex; align-items: center; gap: 9px; font-weight: 950; font-size: 23px; letter-spacing: -1px; }
 .brandmark { color: var(--mint); font-size: 36px; font-weight: 400; }
 .header-caption { color: var(--muted); font-size: 12px; }
+.brand-copy { display: grid; gap: 3px; line-height: 1; }
+.brand-copy .header-caption { display: block; font-size: clamp(8px, 2.4vw, 9px); font-weight: 500; letter-spacing: 0; white-space: nowrap; }
 .header-right { display: flex; align-items: center; gap: 22px; margin-left: auto; }
 .button { min-height: 42px; border: 1px solid #626581; border-radius: 8px; padding: 10px 15px; background: #292d48; color: var(--text); display: inline-flex; align-items: center; justify-content: center; gap: 10px; font-weight: 750; font-size: 12px; transition: background .15s, border-color .15s; white-space: nowrap; }
 .button:hover:not(:disabled) { border-color: var(--mint); background: #353c4b; }
@@ -33,9 +35,20 @@ h1, h2 { margin: 0; font: 100 32px/1.05 var(--display); letter-spacing: .2px; }
 .eyebrow { color: var(--muted); margin: 0 0 8px; font-size: 11px; }
 .small-note { color: var(--muted); font-size: 12px; line-height: 1.6; margin: 10px 0; }
 .resource-bar { position: sticky; top: 0; z-index: 3; background: var(--bg); width: calc(100% - 64px); max-width: 1576px; margin: auto; min-height: 72px; display: flex; align-items: center; gap: 42px; padding: 12px 2px; }
-.resource { display: flex; align-items: center; gap: 13px; min-width: 105px; }
-.resource-icon { color: #ffcf7f; font-size: 29px; }.fuel-resource .resource-icon { color: var(--mint); }.resource:nth-child(3) .resource-icon { color: var(--pink); }
-.resource div > span { display: block; font-size: 11px; color: var(--muted); margin-bottom: 3px; }
+.resource {
+  --resource-accent: #ffcf7f;
+  display: flex; align-items: center; gap: 9px; min-width: 105px; padding: 5px 10px;
+  border: 1px solid #453952; border-radius: 10px; background: linear-gradient(145deg, #262038, #1b182c);
+}
+.fuel-resource { --resource-accent: var(--mint); border-color: #535b42; }
+.resource:nth-child(3) { --resource-accent: var(--pink); }
+.resource-icon {
+  display: grid; place-items: center; flex: none; width: 25px; height: 25px;
+  border-radius: 7px; background: color-mix(in srgb, var(--resource-accent) 12%, transparent);
+  color: var(--resource-accent); font-size: 18px;
+}
+.resource div { display: grid; gap: 3px; }
+.resource div > span { font-size: 11px; color: var(--muted); }
 .resource strong { font: 100 31px/1 var(--display); letter-spacing: .5px; }.resource small { font: 12px ui-monospace, monospace; color: var(--muted); }
 meter { width: 72px; height: 7px; border: 0; background: #34394d; border-radius: 4px; accent-color: var(--mint); }
 meter::-webkit-meter-bar { background: #34394d; border: 0; height: 7px; }meter::-webkit-meter-optimum-value { background: var(--mint); border-radius: 4px; }meter::-moz-meter-bar { background: var(--mint); }
@@ -46,14 +59,29 @@ meter::-webkit-meter-bar { background: #34394d; border: 0; height: 7px; }meter::
 .device-menu { position: fixed; inset: 78px 16px auto auto; margin: 0; width: min(320px, calc(100vw - 24px)); padding: 20px; border: 1px solid #77728d; border-radius: 14px; background: #211a33; color: var(--text); box-shadow: 0 12px 48px #0008; }
 .device-menu h2 { font-size: 23px; }.device-menu p { overflow-wrap: anywhere; }.device-menu .button { width: 100%; margin-top: 8px; }
 @media(min-width:1024px) {
-  .flight-header { display: flex; align-items: center; gap: 16px; position: sticky; top: 12px; z-index: 4; width: calc(100% - 64px); max-width: 1576px; height: 56px; margin: 12px auto 16px; padding: 0 16px; border: 1px solid var(--line); border-radius: 14px; background: #120f20f2; box-shadow: 0 6px 24px #0004; backdrop-filter: blur(12px); }
-  .flight-header header { display: contents; }.flight-header .brand { flex-shrink: 0; font-size: 18px; gap: 6px; }.flight-header .brandmark { font-size: 28px; }.flight-header .header-caption { display: none; }.flight-header .header-right { order: 1; margin: 0; flex-shrink: 0; }.flight-header .button.compact { min-height: 34px; font-size: 11px; padding: 7px 11px; }
-  .flight-header .resource-bar { position: static; flex: 1; width: auto; max-width: none; min-width: 0; min-height: 0; margin: 0; padding: 0; gap: 16px; background: transparent; }
-  .flight-header .resource { min-width: 0; gap: 6px; flex-shrink: 0; }.flight-header .resource-icon { font-size: 19px; }.flight-header .resource div { display: flex; align-items: baseline; gap: 6px; }.flight-header .resource div > span { margin: 0; font-size: 9px; white-space: nowrap; }.flight-header .resource strong { font-size: 22px; }.flight-header .resource small { font-size: 10px; }.flight-header meter { width: 42px; }
-  .flight-header .flight-status { flex-direction: row; align-items: center; gap: 12px; white-space: nowrap; }.flight-header .status { font-size: 8px; letter-spacing: .2px; }.flight-header .tag { font-size: 9px; letter-spacing: .3px; }
+  .flight-header {
+    display: flex; align-items: center; gap: 14px; position: sticky; top: 12px; z-index: 4;
+    width: calc(100% - 64px); max-width: 1576px; min-height: 65px; margin: 12px auto 16px; padding: 6px 13px;
+    border: 1px solid var(--line); border-radius: 14px; background: linear-gradient(105deg, #211b31f5, #151223f5 65%);
+    box-shadow: 0 6px 24px #0005; backdrop-filter: blur(12px);
+  }
+  .flight-header header { display: contents; }
+  .flight-header .brand { flex-shrink: 0; font-size: 19px; gap: 8px; }
+  .flight-header .brandmark { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid #d7ff6340; border-radius: 9px; background: #d7ff6310; font-size: 25px; }
+  .flight-header .header-right { order: 1; margin: 0; flex-shrink: 0; }
+  .flight-header .button.compact { min-height: 38px; font-size: 11px; padding: 7px 11px; }
+  .flight-header .resource-bar { position: static; flex: 1; width: auto; max-width: none; min-width: 0; min-height: 0; margin: 0; padding: 0; gap: 8px; background: transparent; }
+  .flight-header .resource { flex: 1 0 auto; min-width: 90px; max-width: 156px; }
+  .flight-header .fuel-resource { max-width: 190px; }
+  .flight-header .resource div > span { font-size: 10px; white-space: nowrap; }
+  .flight-header .resource strong { font-size: 29px; }
+  .flight-header .resource small { font-size: 11px; }
+  .flight-header meter { width: 42px; margin-left: auto; }
+  .flight-header .flight-status { align-items: flex-start; gap: 5px; padding: 3px 0 3px 12px; border-left: 1px solid #493e58; white-space: nowrap; }
+  .flight-header .status { font-size: 9px; letter-spacing: .15px; }
+  .flight-header .tag { font: 750 13px/1.1 ui-monospace, monospace; letter-spacing: .5px; }
   .canvas-wrap { height: clamp(380px, calc(100svh - 256px), 760px); }
 }
-@media(min-width:1400px) { .flight-header .header-caption { display: inline; font-size: 10px; white-space: nowrap; } }
 .chart { overflow: hidden; border: 1px solid #4b4869; border-radius: 18px; box-shadow: 0 8px 0 #080612; background: radial-gradient(ellipse at 76% 20%, #6046a038, transparent 60%), radial-gradient(ellipse at 15% 85%, #187c8f24, transparent 55%), #101329; }
 .chart-toolbar { min-height: 66px; display: flex; justify-content: space-between; align-items: center; gap: 18px; padding: 12px 24px 0; position: relative; z-index: 1; }
 .chart-toolbar h1 { font-size: 30px; }
@@ -61,6 +89,7 @@ meter::-webkit-meter-bar { background: #34394d; border: 0; height: 7px; }meter::
 .charted-count { font: 10px ui-monospace, monospace; letter-spacing: .6px; white-space: nowrap; color: var(--purple); }
 .canvas-wrap { position: relative; height: clamp(380px, calc(100svh - 324px), 760px); overflow: hidden; }
 #space { touch-action: none; cursor: grab; position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+#rocket-layer { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 4; pointer-events: none; }
 #destinations { position: absolute; inset: 0; pointer-events: none; }
 .planet-node { position: absolute; left: 0; top: 0; width: 156px; text-align: center; pointer-events: auto; z-index: 1; }
 .planet-node.active, .planet-node:focus-within { z-index: 2; }
@@ -160,11 +189,15 @@ dialog[data-phase="verifying"] .press-pointer { display: none; }dialog[data-phas
 }
 @media(min-width:761px) and (max-width:1200px) { .canvas-wrap { min-height: 460px; }.planet-node { width: 112px; } }
 @media(max-width:760px) {
+  .resource-bar { gap: 6px; padding: 8px 0; }
+  .resource { position: relative; flex: 1; min-width: 0; padding: 6px 7px; }
+  .resource-icon { position: absolute; right: 6px; top: 6px; width: 16px; height: 16px; font-size: 13px; }
+  .resource div > span { font-size: 9px; }
   header { padding-inline: 18px; }.brand { font-size: 20px; }.header-right { gap: 14px; }main { padding-inline: 16px; }.resource-bar { width: calc(100% - 32px); gap: 24px; }.flight-status .status { display: none; }.chart-toolbar { padding-inline: 18px; }.chart-toolbar h1 { font-size: 30px; }.mission-dock { align-items: flex-start; flex-direction: column; gap: 13px; }.mission-summary p { max-width: none; }.dock-actions { width: 100%; }.dock-actions .button { flex: 1; }.canvas-wrap { height: clamp(520px, calc(100svh - 400px), 650px); }.planet-node { width: 112px; }.planet-name { font-size: 23px; }.field-notes { grid-template-columns: 1fr; }.receipt-proof { display: none; }.verification-note a { display: none; }footer { padding-inline: 16px; }
 }
 @media(max-width:500px) {
   header { height: 58px; padding-inline: 14px; gap: 12px; }.brand { font-size: 18px; gap: 6px; }.brandmark { font-size: 29px; }.header-right > .text-button { display: none; }.button.compact { min-height: 36px; padding: 8px 11px; font-size: 11px; }main { padding-inline: 10px; }
-  .resource-bar { width: calc(100% - 20px); min-height: 73px; justify-content: space-between; gap: 8px; padding: 12px 5px; }.resource { gap: 7px; min-width: 0; }.resource-icon { font-size: 23px; }.resource div > span { font-size: 9px; }.resource strong { font-size: 28px; }.resource small { font-size: 10px; }.flight-status { display: none; }
+  .resource-bar { width: calc(100% - 20px); min-height: 73px; gap: 6px; }.resource strong { font-size: 28px; }.resource small { font-size: 10px; }.flight-status { display: none; }
   .chart { border-radius: 12px; }.chart-toolbar { min-height: 72px; padding: 13px 15px 0; align-items: flex-start; gap: 7px; }.chart-toolbar h1 { font-size: 27px; }.map-hint { font-size: 10px; max-width: 235px; line-height: 1.5; }.charted-count { font-size: 8px; padding-top: 6px; letter-spacing: 0; white-space: normal; text-align: right; max-width: 61px; line-height: 1.6; }
   .canvas-wrap { height: clamp(520px, calc(100svh - 350px), 650px); }.planet-node { width: 112px; }.planet-name { font-size: 21px; }.planet-loot { font-size: 9px; margin: 3px 0 4px; }.planet-action { font-size: 10px; min-height: 40px; }
   #map-overlay { right: 23px; bottom: 24px; }.launch-sticker { font-size: 24px; }#map-overlay p { font-size: 10px; max-width: 160px; line-height: 1.6; }.scan-readout { left: 14px; bottom: 25px; font-size: 10px; }
@@ -172,7 +205,7 @@ dialog[data-phase="verifying"] .press-pointer { display: none; }dialog[data-phas
   .map-caption { padding: 9px 14px; font-size: 9px; }.flight-log { margin-top: 25px; padding-inline: 5px; }.log-heading { gap: 15px; }.log-heading h2 { font-size: 26px; }.log-heading .text-button { max-width: 92px; font-size: 10px; text-align: right; line-height: 1.5; }.flight-log li { font-size: 11px; gap: 10px; line-height: 1.5; }.flight-log time { font-size: 9px; white-space: nowrap; }.flight-log li > span:first-child { min-width: 20px; }.field-notes { gap: 12px; }.report-body { padding: 0 15px 12px; gap: 10px; }.report-body canvas { width: 110px; height: 130px; }.report-body h2 { font-size: 28px; }.report-body .description,.report-body .small-note { font-size: 11px; }.verification-note { margin-block: 18px; }.seal { display: none; }footer { display: block; font-size: 7px; }footer span { display: block; }
   .approval-heading h2 { font-size: 33px; }.physical-instructions { gap: 6px; }.physical-instructions > div { padding: 9px 6px; gap: 7px; }.physical-instructions strong { font-size: 9px; }
 }
-@media(max-width:390px) { .resource { gap: 5px; }.resource-icon { font-size: 19px; }.resource div > span { font-size: 8px; }.resource strong { font-size: 26px; }.resource small { font-size: 9px; }.device-scene { height: 202px; }.wedgie-model { zoom: .83; }.device-orbit { width: 260px; }dialog { padding-inline: 17px; }.wedgie-stripes { margin-inline: -17px; }.approval-heading h2 { font-size: 31px; } }
+@media(max-width:390px) { .resource div > span { font-size: 8px; }.resource strong { font-size: 26px; }.resource small { font-size: 9px; }.device-scene { height: 202px; }.wedgie-model { zoom: .83; }.device-orbit { width: 260px; }dialog { padding-inline: 17px; }.wedgie-stripes { margin-inline: -17px; }.approval-heading h2 { font-size: 31px; } }
 @media(max-width:360px) { .planet-node { width: 104px; }.planet-action { font-size: 9px; } }
 @media(max-width:760px) { .canvas-wrap[data-worlds="2"] { height: clamp(340px, calc(100svh - 350px), 650px); }.canvas-wrap[data-worlds="4"] { height: clamp(440px, calc(100svh - 350px), 650px); } }
 @media(max-width:1200px) { .planet-title .planet-name { font-size: 20px; } }
@@ -209,4 +242,11 @@ dialog[data-phase="verifying"] .press-pointer { display: none; }dialog[data-phas
 .airdrop-setup { max-width: 840px; margin: 40px auto; padding-bottom: 50px; }.airdrop-setup h1 { font-size: 45px; }.airdrop-setup > p { color: var(--muted); line-height: 1.7; }.airdrop-setup .token-drop > p { line-height: 1.7; }.airdrop-setup label { display: block; font-size: 12px; margin-top: 18px; }.setup-address-input { width: 100%; min-height: 44px; margin: 10px 0; padding: 10px 12px; border: 1px solid #626581; border-radius: 8px; background: #171326; color: var(--text); font: 13px ui-monospace,monospace; }.airdrop-setup .button { margin-top: 10px; }#setup-status { margin-top: 24px; color: var(--mint); }
 
 .crew-card{margin:28px 0;padding:28px;border:1px solid var(--line,#d8d3e3);border-radius:24px;background:var(--panel)}
+#expedition-atlas { scroll-margin-top: 92px; }
+.atlas-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)) auto; align-items: end; gap: 12px; margin-top: 12px; }
+.atlas-controls label { margin: 0; }
+.atlas-entries { padding-inline-start: 22px; }
+.atlas-entries li { padding: 7px 0; }
+#arkiv-tx { color: var(--mint); }
+@media(max-width:650px) { .atlas-controls { grid-template-columns: 1fr; } }
 .crew-heading{display:flex;gap:16px;flex-wrap:wrap;align-items:center;justify-content:space-between}.crew-card h2{margin:4px 0 12px}.crew-card label{display:grid;gap:8px;margin:14px 0;font-weight:600}.crew-card select{width:100%;padding:12px;border:1px solid #d3cfdf;border-radius:10px;background:#181424;color:var(--text);font:inherit;box-sizing:border-box}.monster-collection{display:grid;grid-template-columns:1fr 220px;gap:24px;margin-top:24px}.monster-collection canvas{align-self:center;background:#eeeafa;border-radius:50%}#crew-status{min-height:1.5em}@media(max-width:650px){.crew-card{padding:20px}.monster-collection{grid-template-columns:1fr}.monster-collection canvas{grid-row:1;justify-self:center}.crew-heading{align-items:flex-start}}

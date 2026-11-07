@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/NikolaiL/starproof#readme",
   "dependencies": {
+    "@arkiv-network/sdk": "1.0.1",
     "three": "^0.187.0",
     "viem": "2.57.16",
     "wedgie-actions": "https://codeload.github.com/NikolaiL/wedgie-actions/tar.gz/0fcadb3a79c60b64ab4f9b5a63fb67796b81d4a4"
