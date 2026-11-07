@@ -37,7 +37,7 @@ export const sector = (id) => SECTORS.find((item) => item.id === id);
 export const PROTOCOL = 'starproof/v1';
 export const CHALLENGE_MS = 90_000;
 
-export const DEVICE_VERSION = '0.5.0';
+export const DEVICE_VERSION = '0.5.1';
 
 export function jumpCost(from, to) {
   const a = sector(from), b = sector(to);

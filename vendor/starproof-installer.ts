@@ -1,9 +1,10 @@
 import { Repl } from './repl';
 import { busy, writeFile, unb64 } from './files';
 import { FREE_PY } from './free-app';
+import { DEVICE_VERSION } from '../public/protocol.js';
 
 export async function validateBundle(bundle: any) {
-  if (bundle.app?.mod !== 'starproof' || bundle.version !== '0.5.0' || !/^[a-f0-9]{40}$/.test(bundle.commit) || !Array.isArray(bundle.files) || bundle.files.length !== 5) throw new Error('Invalid Starproof install bundle.');
+  if (bundle.app?.mod !== 'starproof' || bundle.version !== DEVICE_VERSION || !/^[a-f0-9]{40}$/.test(bundle.commit) || !Array.isArray(bundle.files) || bundle.files.length !== 5) throw new Error('Invalid Starproof install bundle.');
   const names = new Set(); let total = 0;
   for (const file of bundle.files) {
     if (!['starproof.py', 'starproof_protocol.py', 'starproof_art.py', 'starproof_actions.py', 'starproof_claim.py'].includes(file.name) || names.has(file.name)) throw new Error('Unsafe install filename.');

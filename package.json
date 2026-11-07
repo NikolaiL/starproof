@@ -32,6 +32,6 @@
   "devDependencies": {
     "@openzeppelin/contracts": "5.6.1",
     "esbuild": "^0.28.2",
-    "starproof-device": "https://codeload.github.com/NikolaiL/wedgie-starproof/tar.gz/80bdad6b3d6379860bdc7c2f121fe1d7931fe07e"
+    "starproof-device": "https://codeload.github.com/NikolaiL/wedgie-starproof/tar.gz/824dd688d63d7b190d2fe6ad910fc552f8ad43fe"
   }
 }

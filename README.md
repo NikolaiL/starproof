@@ -66,7 +66,7 @@ The dark confirmation window has stars and passing comets. Its animated hardware
 
 The red button declines. **Cancel request in browser** invalidates the server challenge and sends an ID-scoped cancel command to dismiss the Wedgie prompt without signing. Reinstall the updated device app for this feature; older copies block USB inside the prompt. A response already signed cannot be recalled, so the browser discards it after cancellation. An emulator may preview the app UI but cannot pass the production certificate check or start a mission.
 
-The economy update preserves existing discoveries, tops the tank up once, and discards pending approvals made under the old prices. The expanded chart also grants new maps earned by previously collected artifacts. Reconnect to install device app 0.5.0, which independently checks each route’s fuel cost.
+The economy update preserves existing discoveries, tops the tank up once, and discards pending approvals made under the old prices. The expanded chart also grants new maps earned by previously collected artifacts. Reconnect to install the current device app, which independently checks each route’s fuel cost.
 
 Local games use process memory and disappear on restart. The Vercel deployment uses private Upstash Redis state with a two-hour idle expiry and atomic compare-and-set updates, so independent function instances cannot consume a challenge twice. Browser cookies identify the local session; returning to the same cookie resumes it and signed actions still require the original chip.
 
