@@ -18,6 +18,16 @@ export function smoothCamera(current, target, dt, reducedMotion = false) {
     zoom: current.zoom + (target.zoom - current.zoom) * blend };
 }
 
+export function followCamera(ship, bounds, width, height, camera) {
+  const scale = Math.min(width / bounds.width, height / bounds.height) * camera.zoom;
+  if (scale <= 0) return camera;
+  const point = mapPoint(ship, bounds, width, height, camera);
+  const margin = Math.min(96, width / 2, height / 2);
+  const dx = point.x - Math.max(margin, Math.min(width - margin, point.x));
+  const dy = point.y - Math.max(margin, Math.min(height - margin, point.y));
+  return dx || dy ? { ...camera, x: camera.x + dx / scale, y: camera.y + dy / scale } : camera;
+}
+
 export function planetAction(state, id, ready, busy) {
   const here = id === state.location, claimed = state.claims.includes(id);
   const cost = here ? 0 : jumpCost(state.location, id);

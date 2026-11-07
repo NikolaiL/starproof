@@ -3,7 +3,7 @@ import { mountAirdrop } from './airdrop.js';
 import { WedgieSigner } from './sdk.js';
 import { SECTORS, MAPS, MAX_FUEL, START_CREDITS, SCAVENGE_FUEL, jumpCost, DEVICE_VERSION, sector, PROTOCOL, chartedWorlds, chartBounds } from './protocol.js';
 import { drawPlanet, drawMonster, drawShip, drawBackdrop, drawJourney, journeyFrame, drawConfetti, shipHeading, journeyHeading } from './graphics.js';
-import { mapPoint, planetAction, focusCamera, smoothCamera } from './navigation.js';
+import { mapPoint, planetAction, focusCamera, smoothCamera, followCamera } from './navigation.js';
 import { openApproval, showVerifying, closeApproval, openInstall, installProgress } from './approval.js';
 import { showModel, stopModelPress, closeModel } from './wedgie-model.js';
 
@@ -19,6 +19,7 @@ let deviceInput = null, infoOpenFor = null, infoPointer = false;
 let ping = null, journey = null, celebration = null;
 let camera = { x: view.left + view.width / 2, y: view.top + view.height / 2, zoom: 1 };
 let mapView = { ...camera };
+let followingShip = false;
 let knownCount = chartedWorlds(state.maps).length, overview = false, drag = null, dragged = false;
 let cancellation;
 const keys = new Set();
@@ -52,7 +53,7 @@ function togglePlanetInfo(id = selected) {
   select(id);
   if (close) $('planet-info').hidePopover(); else $('planet-info').showPopover();
 }
-function focusMap(id) { const box = canvas.getBoundingClientRect(); camera = focusCamera(sector(id), viewTarget, box.width, box.height); }
+function focusMap(id) { followingShip = false; const box = canvas.getBoundingClientRect(); camera = focusCamera(sector(id), viewTarget, box.width, box.height); }
 function visibleWorlds() { return chartedWorlds(state.maps); }
 function dock() { const here = sector(state.location); ship = { x: here.x, y: here.y, heading: ship.heading ?? 0 }; }
 
@@ -358,6 +359,7 @@ canvas.addEventListener('click', (event) => {
   canvas.focus({ preventScroll: true });
 });
 canvas.addEventListener('pointerdown', event => {
+  followingShip = false;
   drag = { x: event.clientX, y: event.clientY, camera: { ...camera } }; dragged = false;
   canvas.setPointerCapture(event.pointerId);
 });
@@ -372,11 +374,12 @@ canvas.addEventListener('pointermove', event => {
 });
 canvas.addEventListener('pointerup', () => { drag = null; });
 canvas.addEventListener('pointercancel', () => { drag = null; });
-$('zoom-in').addEventListener('click', () => { camera.zoom = Math.min(6, camera.zoom * 1.35); });
-$('zoom-out').addEventListener('click', () => { camera.zoom = Math.max(.6, camera.zoom / 1.35); });
-$('fit-map').addEventListener('click', () => { camera = { x: viewTarget.left + viewTarget.width / 2, y: viewTarget.top + viewTarget.height / 2, zoom: 1 }; });
-$('center-map').addEventListener('click', () => { const box = canvas.getBoundingClientRect(); camera = focusCamera(ship, viewTarget, box.width, box.height); });
+$('zoom-in').addEventListener('click', () => { followingShip = false; camera.zoom = Math.min(6, camera.zoom * 1.35); });
+$('zoom-out').addEventListener('click', () => { followingShip = false; camera.zoom = Math.max(.6, camera.zoom / 1.35); });
+$('fit-map').addEventListener('click', () => { followingShip = false; camera = { x: viewTarget.left + viewTarget.width / 2, y: viewTarget.top + viewTarget.height / 2, zoom: 1 }; });
+$('center-map').addEventListener('click', () => { followingShip = true; const box = canvas.getBoundingClientRect(); camera = focusCamera(ship, viewTarget, box.width, box.height); });
 $('minimap').addEventListener('click', event => {
+  followingShip = false;
   const box = $('minimap').getBoundingClientRect();
   const scale = Math.min(box.width / viewTarget.width, box.height / viewTarget.height);
   camera.x = viewTarget.left + viewTarget.width / 2 + (event.clientX - box.left - box.width / 2) / scale;
@@ -410,6 +413,11 @@ function frame(time) {
     if (dx || dy) { const target = shipHeading(dx, dy); ship.heading += Math.atan2(Math.sin(target - ship.heading), Math.cos(target - ship.heading)) * (reducedMotion ? 1 : Math.min(1, dt * 14)); }
     ship.x = Math.max(viewTarget.left + (w < 760 ? .6 : viewTarget.width * .05), Math.min(viewTarget.left + viewTarget.width - (w < 760 ? .6 : viewTarget.width * .05), ship.x));
     ship.y = Math.max(viewTarget.top + (w < 760 ? .65 : viewTarget.height * .08), Math.min(viewTarget.top + viewTarget.height - (w < 760 ? .7 : viewTarget.height * .11), ship.y));
+  }
+  if (moving) followingShip = true;
+  if (followingShip && state.started && !busy && !journey) {
+    camera = followCamera(ship, view, w, h, camera);
+    mapView = followCamera(ship, view, w, h, mapView);
   }
   drawBackdrop(ctx, w, h, artTime, camera);
   const here = sector(state.location), destination = sector(selected);
