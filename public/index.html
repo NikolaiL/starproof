@@ -29,19 +29,20 @@
   <script type="module" src="/app.js"></script>
 </head>
 <body>
+  <div class="flight-header">
   <header>
     <a class="brand" href="/" aria-label="Starproof home"><span class="brandmark" aria-hidden="true">✳</span> STARPROOF</a>
     <span class="header-caption">An odd little space adventure</span>
-    <div class="header-right"><button id="connect" class="button compact">Connect Wedgie ↗</button></div>
+    <div class="header-right"><button id="connect" class="button compact" aria-controls="device-menu" aria-expanded="false">Connect Wedgie ↗</button></div>
   </header>
-  <main>
     <section class="resource-bar" aria-label="Ship resources">
       <div class="resource fuel-resource"><span class="resource-icon" aria-hidden="true">◒</span><div><span>Jump fuel</span><strong id="fuel">08 <small>/ 08</small></strong></div><meter id="fuel-meter" min="0" max="8" value="8" aria-label="Fuel remaining">8 of 8</meter></div>
       <div class="resource"><span class="resource-icon" aria-hidden="true">✦</span><div><span>Credits</span><strong id="credits">8</strong></div></div>
       <div class="resource"><span class="resource-icon" aria-hidden="true">◇</span><div><span>Artifacts collected</span><strong id="artifact-count">0</strong></div></div>
       <div class="flight-status"><span id="trust-status" class="status">AWAITING LAUNCH</span><span id="location-tag" class="tag">SOL SYSTEM</span></div>
     </section>
-
+  </div>
+  <main>
     <section class="chart" aria-label="Star map">
       <div class="chart-toolbar"><div><h1 id="chart-title">Space gets weird.</h1><p id="map-hint" class="map-hint">Recover artifacts to expand your star chart.</p></div><span id="charted-count" class="charted-count">4 stars charted</span></div>
       <div class="canvas-wrap">
@@ -80,7 +81,13 @@
     <section class="verification-note"><span class="seal">◎</span><p><strong>Proof of a chip, not proof of a person.</strong> For Wedgie-confirmed actions, the server checks the Infineon certificate chain, the exact action and a fresh challenge. Demo actions are explicitly logged as unsigned. It cannot attest the device firmware or prove a human pressed the button.</p><a href="https://wedgie.dev/trustm.md" target="_blank" rel="noreferrer">Meet the hardware ↗</a></section>
   </main>
   <footer><span>STARPROOF / EXPERIMENTAL FLIGHT SOFTWARE · <a href="https://github.com/NikolaiL/starproof" target="_blank" rel="noreferrer">GITHUB ↗</a></span><span>GAMEPLAY HAS NO TRANSACTION FEES. JUST SPACE.</span></footer>
-  <div id="notice" role="status" aria-live="polite" hidden></div>
+  <div id="notice" role="status" aria-live="polite"></div>
+  <div id="device-menu" class="device-menu" popover="auto" role="dialog" aria-labelledby="connection-title">
+    <h2 id="connection-title" tabindex="-1" autofocus>Wedgie connected</h2>
+    <p id="connection-status"></p><p id="connection-app" class="small-note"></p><p id="connection-detail" class="small-note"></p>
+    <p class="small-note">Your factory private key stays on the chip.</p>
+    <button id="disconnect" class="button subtle">Disconnect Wedgie</button>
+  </div>
   <div id="planet-info" class="planet-popup" popover="auto" role="dialog" aria-labelledby="destination-name">
     <button id="close-planet-info" class="popup-close" popovertarget="planet-info" popovertargetaction="hide" aria-label="Close planet information" autofocus>×</button>
     <canvas id="planet" width="300" height="225" aria-hidden="true"></canvas><p id="world-type" class="eyebrow">Selected system</p><h2 id="destination-name">Kepler</h2><p id="destination-description" class="description"></p><p id="loot-note" class="small-note"></p><div id="resident-card" class="resident-card"><strong id="resident-name"></strong><p id="resident-note"></p></div><dl class="destination-facts"><div><dt>Landmark</dt><dd id="landmark"></dd></div><div><dt>Status</dt><dd id="destination-state"></dd></div><div><dt>Jump cost</dt><dd id="jump-cost"></dd></div></dl>

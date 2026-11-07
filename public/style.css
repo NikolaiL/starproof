@@ -28,10 +28,11 @@ header { height: 58px; padding: 0 32px; display: flex; align-items: center; gap:
 .text-button { background: transparent; color: var(--purple); border: 0; padding: 8px 0; font-size: 12px; font-weight: 650; text-align: left; }
 .text-button:hover:not(:disabled), a:hover { color: var(--text); }.text-button:disabled { opacity: .4; }
 main { padding: 0 32px; }
+.flight-header { display: contents; }
 h1, h2 { margin: 0; font: 100 32px/1.05 var(--display); letter-spacing: .2px; }
 .eyebrow { color: var(--muted); margin: 0 0 8px; font-size: 11px; }
 .small-note { color: var(--muted); font-size: 12px; line-height: 1.6; margin: 10px 0; }
-.resource-bar { position: sticky; top: 0; z-index: 3; background: var(--bg); min-height: 72px; display: flex; align-items: center; gap: 42px; padding: 12px 2px; }
+.resource-bar { position: sticky; top: 0; z-index: 3; background: var(--bg); width: calc(100% - 64px); max-width: 1576px; margin: auto; min-height: 72px; display: flex; align-items: center; gap: 42px; padding: 12px 2px; }
 .resource { display: flex; align-items: center; gap: 13px; min-width: 105px; }
 .resource-icon { color: #ffcf7f; font-size: 29px; }.fuel-resource .resource-icon { color: var(--mint); }.resource:nth-child(3) .resource-icon { color: var(--pink); }
 .resource div > span { display: block; font-size: 11px; color: var(--muted); margin-bottom: 3px; }
@@ -41,6 +42,18 @@ meter::-webkit-meter-bar { background: #34394d; border: 0; height: 7px; }meter::
 .flight-status { margin-left: auto; display: flex; align-items: flex-end; flex-direction: column; gap: 8px; }
 .status { color: var(--muted); font: 9px ui-monospace, monospace; letter-spacing: .6px; }.status.verified { color: var(--mint); }
 .tag { font: 10px ui-monospace, monospace; letter-spacing: .7px; color: #eee7ff; }
+.button.compact.is-connected { background: #242638; border-color: #626581; color: var(--mint); }
+.device-menu { position: fixed; inset: 78px 16px auto auto; margin: 0; width: min(320px, calc(100vw - 24px)); padding: 20px; border: 1px solid #77728d; border-radius: 14px; background: #211a33; color: var(--text); box-shadow: 0 12px 48px #0008; }
+.device-menu h2 { font-size: 23px; }.device-menu p { overflow-wrap: anywhere; }.device-menu .button { width: 100%; margin-top: 8px; }
+@media(min-width:1024px) {
+  .flight-header { display: flex; align-items: center; gap: 16px; position: sticky; top: 12px; z-index: 4; width: calc(100% - 64px); max-width: 1576px; height: 56px; margin: 12px auto 16px; padding: 0 16px; border: 1px solid var(--line); border-radius: 14px; background: #120f20f2; box-shadow: 0 6px 24px #0004; backdrop-filter: blur(12px); }
+  .flight-header header { display: contents; }.flight-header .brand { flex-shrink: 0; font-size: 18px; gap: 6px; }.flight-header .brandmark { font-size: 28px; }.flight-header .header-caption { display: none; }.flight-header .header-right { order: 1; margin: 0; flex-shrink: 0; }.flight-header .button.compact { min-height: 34px; font-size: 11px; padding: 7px 11px; }
+  .flight-header .resource-bar { position: static; flex: 1; width: auto; max-width: none; min-width: 0; min-height: 0; margin: 0; padding: 0; gap: 16px; background: transparent; }
+  .flight-header .resource { min-width: 0; gap: 6px; flex-shrink: 0; }.flight-header .resource-icon { font-size: 19px; }.flight-header .resource div { display: flex; align-items: baseline; gap: 6px; }.flight-header .resource div > span { margin: 0; font-size: 9px; white-space: nowrap; }.flight-header .resource strong { font-size: 22px; }.flight-header .resource small { font-size: 10px; }.flight-header meter { width: 42px; }
+  .flight-header .flight-status { flex-direction: row; align-items: center; gap: 12px; white-space: nowrap; }.flight-header .status { font-size: 8px; letter-spacing: .2px; }.flight-header .tag { font-size: 9px; letter-spacing: .3px; }
+  .canvas-wrap { height: clamp(380px, calc(100svh - 256px), 760px); }
+}
+@media(min-width:1400px) { .flight-header .header-caption { display: inline; font-size: 10px; white-space: nowrap; } }
 .chart { overflow: hidden; border: 1px solid #4b4869; border-radius: 18px; box-shadow: 0 8px 0 #080612; background: radial-gradient(ellipse at 76% 20%, #6046a038, transparent 60%), radial-gradient(ellipse at 15% 85%, #187c8f24, transparent 55%), #101329; }
 .chart-toolbar { min-height: 66px; display: flex; justify-content: space-between; align-items: center; gap: 18px; padding: 12px 24px 0; position: relative; z-index: 1; }
 .chart-toolbar h1 { font-size: 30px; }
@@ -106,7 +119,8 @@ summary { cursor: pointer; padding: 17px 20px; font-size: 13px; font-weight: 700
 .source-link { display: block; font-size: 11px; font-weight: 700; line-height: 1.9; color: var(--purple); }.source-link:hover { text-decoration: underline; }
 .verification-note { display: flex; align-items: center; gap: 16px; margin: 26px 0; padding: 16px 0; color: var(--muted); }.verification-note p { max-width: 850px; font-size: 11px; line-height: 1.8; margin: 0; }.verification-note strong { color: var(--text); }.seal { font-size: 30px; color: var(--purple); }.verification-note a { margin-left: auto; font-size: 11px; white-space: nowrap; }
 footer { padding: 0 32px 25px; color: #8c91ac; display: flex; justify-content: space-between; font: 8px/1.8 ui-monospace, monospace; gap: 20px; }
-#notice { position: fixed; z-index: 5; bottom: 24px; left: 50%; transform: translateX(-50%); width: max-content; max-width: min(90vw,620px); background: #faf6e8; border: 2px solid #17152b; color: #242037; box-shadow: 5px 5px 0 #070815; border-radius: 10px; padding: 14px 20px; font-size: 12px; line-height: 1.6; font-weight: 650; }
+#notice { position: fixed; z-index: 5; bottom: 24px; left: 50%; transform: translate(-50%, 10px); width: max-content; max-width: min(90vw,620px); background: #191424f5; border: 1px solid #77618f; color: var(--text); box-shadow: 0 10px 35px #0008; backdrop-filter: blur(10px); border-radius: 10px; padding: 14px 20px; font-size: 12px; line-height: 1.6; font-weight: 650; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .18s ease, transform .18s ease, visibility 0s .18s; }
+#notice.is-visible { opacity: 1; visibility: visible; transform: translate(-50%, 0); transition-delay: 0s; }
 /* A hardware guide in Wedgie's own green / grey / red visual language. */
 dialog { color-scheme: dark; isolation: isolate; width: min(490px, calc(100vw - 28px)); max-height: calc(100dvh - 28px); padding: 0 28px 23px; border: 2px solid #51496f; border-radius: 25px; color: #faf6e8; background: radial-gradient(ellipse at 80% 35%, #39285c88, transparent 60%), #111124; text-align: center; overflow-x: hidden; box-shadow: 0 25px 140px #0009; }
 dialog[open] { animation: dialog-arrive .32s cubic-bezier(.2,.8,.3,1); }dialog::backdrop { background: #0a081dc9; backdrop-filter: blur(9px); }
@@ -146,11 +160,11 @@ dialog[data-phase="verifying"] .press-pointer { display: none; }dialog[data-phas
 }
 @media(min-width:761px) and (max-width:1200px) { .canvas-wrap { min-height: 460px; }.planet-node { width: 112px; } }
 @media(max-width:760px) {
-  header { padding-inline: 18px; }.brand { font-size: 20px; }.header-right { gap: 14px; }main { padding-inline: 16px; }.resource-bar { gap: 24px; }.flight-status .status { display: none; }.chart-toolbar { padding-inline: 18px; }.chart-toolbar h1 { font-size: 30px; }.mission-dock { align-items: flex-start; flex-direction: column; gap: 13px; }.mission-summary p { max-width: none; }.dock-actions { width: 100%; }.dock-actions .button { flex: 1; }.canvas-wrap { height: clamp(520px, calc(100svh - 400px), 650px); }.planet-node { width: 112px; }.planet-name { font-size: 23px; }.field-notes { grid-template-columns: 1fr; }.receipt-proof { display: none; }.verification-note a { display: none; }footer { padding-inline: 16px; }
+  header { padding-inline: 18px; }.brand { font-size: 20px; }.header-right { gap: 14px; }main { padding-inline: 16px; }.resource-bar { width: calc(100% - 32px); gap: 24px; }.flight-status .status { display: none; }.chart-toolbar { padding-inline: 18px; }.chart-toolbar h1 { font-size: 30px; }.mission-dock { align-items: flex-start; flex-direction: column; gap: 13px; }.mission-summary p { max-width: none; }.dock-actions { width: 100%; }.dock-actions .button { flex: 1; }.canvas-wrap { height: clamp(520px, calc(100svh - 400px), 650px); }.planet-node { width: 112px; }.planet-name { font-size: 23px; }.field-notes { grid-template-columns: 1fr; }.receipt-proof { display: none; }.verification-note a { display: none; }footer { padding-inline: 16px; }
 }
 @media(max-width:500px) {
   header { height: 58px; padding-inline: 14px; gap: 12px; }.brand { font-size: 18px; gap: 6px; }.brandmark { font-size: 29px; }.header-right > .text-button { display: none; }.button.compact { min-height: 36px; padding: 8px 11px; font-size: 11px; }main { padding-inline: 10px; }
-  .resource-bar { min-height: 73px; justify-content: space-between; gap: 8px; padding: 12px 5px; }.resource { gap: 7px; min-width: 0; }.resource-icon { font-size: 23px; }.resource div > span { font-size: 9px; }.resource strong { font-size: 28px; }.resource small { font-size: 10px; }.flight-status { display: none; }
+  .resource-bar { width: calc(100% - 20px); min-height: 73px; justify-content: space-between; gap: 8px; padding: 12px 5px; }.resource { gap: 7px; min-width: 0; }.resource-icon { font-size: 23px; }.resource div > span { font-size: 9px; }.resource strong { font-size: 28px; }.resource small { font-size: 10px; }.flight-status { display: none; }
   .chart { border-radius: 12px; }.chart-toolbar { min-height: 72px; padding: 13px 15px 0; align-items: flex-start; gap: 7px; }.chart-toolbar h1 { font-size: 27px; }.map-hint { font-size: 10px; max-width: 235px; line-height: 1.5; }.charted-count { font-size: 8px; padding-top: 6px; letter-spacing: 0; white-space: normal; text-align: right; max-width: 61px; line-height: 1.6; }
   .canvas-wrap { height: clamp(520px, calc(100svh - 350px), 650px); }.planet-node { width: 112px; }.planet-name { font-size: 21px; }.planet-loot { font-size: 9px; margin: 3px 0 4px; }.planet-action { font-size: 10px; min-height: 40px; }
   #map-overlay { right: 23px; bottom: 24px; }.launch-sticker { font-size: 24px; }#map-overlay p { font-size: 10px; max-width: 160px; line-height: 1.6; }.scan-readout { left: 14px; bottom: 25px; font-size: 10px; }

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mapPoint, planetAction, focusCamera, smoothCamera, followCamera } from '../public/navigation.js';
+import { mapPoint, planetAction, focusCamera, smoothCamera, followCamera, planetControls } from '../public/navigation.js';
 import { chartBounds, chartedWorlds } from '../public/protocol.js';
 
 test('planet controls distinguish collecting, revisiting, insufficient fuel and device readiness', () => {
@@ -80,4 +80,23 @@ test('following corrects both camera lag and zoom transitions, including after m
     assert.ok(point.y >= 96 - 1e-9 && point.y <= height - 96 + 1e-9);
   }
   assert.equal(target.zoom, 6);
+});
+
+test('partly visible planets keep their complete controls inside every map edge', () => {
+  assert.equal(planetControls({ x: 10, y: 0 }, 40, 300, 0, 112, 98, 43).visible, false, 'a map scrolled completely out of view has no visible planets');
+  for (const [width, height, labelWidth, labelHeight] of [[298, 520, 112, 98], [740, 460, 112, 98], [1214, 365, 156, 101]]) {
+    const radius = 40;
+    for (const point of [{ x: -39, y: height / 2 }, { x: width + 39, y: height / 2 }, { x: width / 2, y: -39 }, { x: width / 2, y: height + 39 }, { x: -20, y: -20 }]) {
+      const controls = planetControls(point, radius, width, height, labelWidth, labelHeight, 43);
+      assert.equal(controls.visible, true);
+      assert.ok(controls.x - labelWidth / 2 >= 8 && controls.x + labelWidth / 2 <= width - 8);
+      assert.ok(controls.y >= 8 && controls.y + labelHeight <= height - 8);
+    }
+    for (const point of [{ x: -41, y: height / 2 }, { x: width / 2, y: height + 41 }, { x: -30, y: -30 }]) {
+      assert.equal(planetControls(point, radius, width, height, labelWidth, labelHeight, 43).visible, false);
+    }
+    const inside = planetControls({ x: width / 2, y: height / 2 }, radius, width, height, labelWidth, labelHeight, 43);
+    assert.equal(inside.x, width / 2);
+    assert.equal(inside.y, height / 2 + 43);
+  }
 });

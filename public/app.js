@@ -3,7 +3,7 @@ import { mountAirdrop } from './airdrop.js';
 import { WedgieSigner } from './sdk.js';
 import { SECTORS, MAPS, MAX_FUEL, START_CREDITS, SCAVENGE_FUEL, jumpCost, DEVICE_VERSION, sector, PROTOCOL, chartedWorlds, chartBounds } from './protocol.js';
 import { drawPlanet, drawMonster, drawShip, drawBackdrop, drawJourney, journeyFrame, drawConfetti, shipHeading, journeyHeading } from './graphics.js';
-import { mapPoint, planetAction, focusCamera, smoothCamera, followCamera } from './navigation.js';
+import { mapPoint, planetAction, focusCamera, smoothCamera, followCamera, planetControls } from './navigation.js';
 import { openApproval, showVerifying, closeApproval, openInstall, installProgress } from './approval.js';
 import { showModel, stopModelPress, closeModel } from './wedgie-model.js';
 
@@ -25,6 +25,7 @@ let cancellation;
 const keys = new Set();
 const planetNodes = new Map();
 const canvas = $('space'), ctx = canvas.getContext('2d');
+const flightHeader = document.querySelector('.flight-header'), resourceBar = document.querySelector('.resource-bar');
 const portrait = $('planet'), portraitContext = portrait.getContext('2d');
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -44,7 +45,7 @@ function syncDeviceStats() {
   return statsUpdate;
 }
 setInterval(() => { if (deviceReady && !busy) void syncDeviceStats(); }, 2000);
-function notice(text) { clearTimeout(noticeTimer); $('notice').textContent = text; $('notice').hidden = false; noticeTimer = setTimeout(() => $('notice').hidden = true, 9000); }
+function notice(text) { clearTimeout(noticeTimer); $('notice').textContent = text; $('notice').classList.add('is-visible'); noticeTimer = setTimeout(() => $('notice').classList.remove('is-visible'), 9000); }
 function select(id) { if (state.maps.includes(sector(id).map)) { selected = id; focusMap(id); render(); } }
 function togglePlanetInfo(id = selected) {
   const close = infoOpenFor === id;
@@ -118,7 +119,11 @@ function render() {
   $('connect').disabled = busy;
   $('signing-help').disabled = busy;
   $('scan').disabled = !state.started || busy;
-  $('connect').textContent = signer.port && deviceReady ? 'Disconnect ↗' : 'Connect Wedgie ↗';
+  const connected = !!signer.port && deviceReady;
+  $('connect').textContent = connected ? 'Connected ▾' : 'Connect Wedgie ↗';
+  $('connect').classList.toggle('is-connected', connected);
+  $('connect').setAttribute('aria-haspopup', connected ? 'dialog' : 'false');
+  $('disconnect').disabled = busy;
   $('dock-location').textContent = (state.started ? 'Docked at ' : 'Ready at ') + sector(state.location).name;
   $('mission-hint').textContent = !deviceReady && state.started && Object.values(state.confirmations || {}).some(value => !value) ? 'Demo actions work without device confirmation.' : !deviceReady ? 'Connect your Wedgie to ' + (state.started ? 'continue.' : 'launch.') : state.started ? 'Pick a planet. Sign the big decisions.' : 'Your chip is ready. Launch your expedition.';
   const demoActions = Object.values(state.confirmations || {}).some(required => !required);
@@ -154,10 +159,10 @@ function render() {
 }
 
 async function connectDevice() {
+  if (signer.port && deviceReady) return true;
   if (busy) return false;
   busy = true; render();
   try {
-    if (signer.port && deviceReady) { await signer.disconnect(); return false; }
     await signer.connect({ version: DEVICE_VERSION, install: async (port) => {
       const response = await fetch('/device-install.json');
       if (!response.ok) throw new Error('Could not load the device installer. Reload and try again.');
@@ -203,8 +208,28 @@ async function deviceJob(work) {
   finally { busy = false; render(); void syncDeviceStats(); }
 }
 mountAirdrop({ signer, api, deviceJob, notice });
-$('connect').addEventListener('click', connectDevice);
+$('connect').addEventListener('click', () => {
+  if (busy) return;
+  if (!signer.port || !deviceReady) { void connectDevice(); return; }
+  const box = $('connect').getBoundingClientRect(), menu = $('device-menu');
+  menu.style.top = box.bottom + 8 + 'px';
+  menu.style.right = Math.max(12, innerWidth - box.right) + 'px';
+  $('connection-status').textContent = $('device-status').textContent;
+  $('connection-app').textContent = 'Starproof app ' + DEVICE_VERSION + ' · USB';
+  $('connection-detail').textContent = $('device-detail').textContent;
+  menu.togglePopover();
+});
+$('device-menu').addEventListener('toggle', event => $('connect').setAttribute('aria-expanded', String(event.newState === 'open')));
+$('disconnect').addEventListener('click', async () => {
+  if (busy) return;
+  busy = true; $('device-menu').hidePopover(); render();
+  try { if (statsUpdate) await statsUpdate; await signer.disconnect(); }
+  catch (error) { notice(error.message); }
+  finally { busy = false; render(); }
+});
 signer.addEventListener('disconnect', () => {
+  $('device-menu').hidePopover();
+  $('connect').setAttribute('aria-expanded', 'false');
   deviceInput = null;
   deviceReady = false; $('device-status').textContent = 'No Wedgie connected';
   $('device-detail').textContent = 'Reconnect the same chip to commit another decision.'; render();
@@ -387,6 +412,8 @@ function frame(time) {
   const box = canvas.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2);
   if (canvas.width !== Math.round(box.width * dpr) || canvas.height !== Math.round(box.height * dpr)) { canvas.width = Math.round(box.width * dpr); canvas.height = Math.round(box.height * dpr); }
   const w = box.width, h = box.height; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h);
+  const controlsTop = Math.max(0, Math.max(flightHeader.getBoundingClientRect().bottom, resourceBar.getBoundingClientRect().bottom) - box.top);
+  const controlsHeight = Math.max(0, Math.min(h, innerHeight - box.top) - controlsTop);
   for (const key of ['left', 'top', 'width', 'height']) view[key] += (viewTarget[key] - view[key]) * (reducedMotion ? 1 : Math.min(1, dt * 4));
   if (journey && !reducedMotion) {
     const f = journeyFrame(time - journey.at);
@@ -433,9 +460,9 @@ function frame(time) {
     const { x, y } = point(star), active = star.id === selected;
     const size = overview ? .55 : w < 760 ? 1 : 1.45;
     const node = planetNodes.get(star.id).node;
-    node.hidden = overview || x < 64 || x > w - 64 || y < 36 || y > h - 125;
-    node.style.transform = `translate(${x}px, ${y + (w < 760 ? 31 : 43)}px) translateX(-50%)`;
-    if (overview) { ctx.font = 'bold 10px ui-sans-serif, sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = star.color; ctx.fillText(star.name, x, y + 22); }
+    const label = planetControls({ x, y: y - controlsTop }, (active ? 23 : 17) * size * 2.3, w, controlsHeight, node.offsetWidth, node.offsetHeight, w < 760 ? 31 : 43);
+    node.style.visibility = label.visible ? '' : 'hidden';
+    node.style.transform = `translate(${label.x}px, ${label.y + controlsTop}px) translateX(-50%)`;
     ctx.strokeStyle = active ? '#deff6266' : '#a294fa20'; ctx.lineWidth = active ? 2 : 1; ctx.setLineDash(active ? [3, 7] : []);
     ctx.beginPath(); ctx.ellipse(x, y, (active ? 46 : 34) * size, (active ? 46 : 34) * size, 0, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
     drawPlanet(ctx, star, x, y, (active ? 23 : 17) * size, artTime);
