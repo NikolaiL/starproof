@@ -111,7 +111,7 @@ function render() {
   $('launch').disabled = busy;
   $('start-exploring').disabled = busy;
   $('start-exploring').textContent = busy ? 'Preparing your adventure…' : 'Start exploring ↗';
-  $('start-hint').textContent = deviceReady ? 'Your Wedgie is ready. Press green to launch.' : 'Connect your Wedgie, then press green to launch.';
+  $('start-hint').textContent = deviceReady ? 'Choose Start exploring, then press green to confirm.' : 'Connect your Wedgie, then start exploring.';
   $('refuel').hidden = !state.started;
   $('scavenge').hidden = !state.started;
   $('scan').hidden = !state.started;
@@ -212,14 +212,8 @@ signer.addEventListener('disconnect', () => {
 
 signer.addEventListener('input', event => {
   if (!deviceReady || busy || $('approval').open) return;
-  if (event.detail.action === 'info') { deviceInput = null; togglePlanetInfo(); return; }
+  if (event.detail.action === 'go') { deviceInput = null; togglePlanetInfo(); return; }
   if ($('planet-info').matches(':popover-open')) return;
-  if (event.detail.action === 'go') {
-    if (!state.started) void startExploring();
-    else if (selected !== state.location) void commit('jump', selected);
-    else notice('Select another planet, or fly closer and press red to scan.');
-    return;
-  }
   if (!state.started) return;
   if (event.detail.action === 'refuel' || event.detail.action === 'scavenge') { void commit(event.detail.action, state.location); return; }
   deviceInput = { ...event.detail, at: performance.now() };

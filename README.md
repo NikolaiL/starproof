@@ -48,7 +48,7 @@ Only one tab or serial tool can hold the Wedgie USB connection. If the port cann
 
 ### Hardware navigation
 
-With device app **0.5.0**, the joystick flies the browser spaceship and its press toggles planet info. Green launches or travels to the selected planet; the second button refuels; the third scavenges; red scans. Shortcuts use the same game rules and confirmation settings as browser buttons. In an approval prompt, green confirms and red declines; opening that prompt never counts as its approval. The idle device screen shows browser-supplied game stats, separately from validated signing previews.
+With device app **0.5.0**, the joystick flies the browser spaceship; its press is inactive. The first (green) button toggles the selected planet’s info popup; the second button refuels; the third scavenges; red scans. Use **Start exploring** and the planets’ **Travel** buttons in the browser to launch or travel. This mapping is applied by the browser, so no device reinstall is needed. Shortcuts use the same game rules and confirmation settings as browser buttons. In an approval prompt, green confirms and red declines; opening that prompt never counts as its approval. The idle device screen shows browser-supplied game stats, separately from validated signing previews.
 
 ### Demo confirmation settings
 
